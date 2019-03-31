@@ -82,7 +82,7 @@ namespace HBScore
             ListPages();
             RenderedPages = new List<Image>(pageBoundaries.Count);
             for (int i = 0; i < pageBoundaries.Count; i++)
-                RenderedPages.Add(RenderScorePage(i));
+                RenderedPages.Add(RenderPage(i));
         }
 
         List<int> pageBoundaries;
@@ -110,83 +110,12 @@ namespace HBScore
             totalBeats = beats;
         }
 
-        private int IndexOfFirstBarOfPage(int page)
-            => page >= pageBoundaries.Count ?
-            barBoundaries.Count :
-            barBoundaries.IndexOf(pageBoundaries[page]);
-
-        private int IndexOfLastBarOfPage(int page)
-            => IndexOfFirstBarOfPage(page + 1) - 1;
-
         private int IndexOfFirstBarOfSystem(int system)
             => system >= systemBoundaries.Count ?
             barBoundaries.Count :
             barBoundaries.IndexOf(systemBoundaries[system]);
 
-        private int IndexOfLastBarInSystem(int system)
-            => IndexOfFirstBarOfSystem(system + 1) - 1;
-
-        IEnumerable<IMeasure> MeasuresOnPage(int page)
-        {
-            int firstBarOfPageIdx = IndexOfFirstBarOfPage(page);
-            int firstBarOfNextPageIdx = IndexOfFirstBarOfPage(page + 1);
-            return Score
-                .Measures
-                .Skip(firstBarOfPageIdx)
-                .Take(firstBarOfNextPageIdx - firstBarOfPageIdx);
-        }
-
-        private int IndexOfSystemOnPageForBeat(int beat) 
-            => IndexOfSystemForBeat(beat) % SystemsPerPage;
-
-        private int IndexOfSystemForBeat(int beat)
-        {
-            int i = 0;
-            while (i < systemBoundaries.Count && systemBoundaries[i] <= beat)
-                i++;
-            return i - 1;
-        }
-
-        private int IndexOfPageForBeat(int beat)
-        {
-            int i = 0;
-            while (i < pageBoundaries.Count && pageBoundaries[i] <= beat)
-                i++;
-            return i - 1;
-        }
-
-        int BeatsInSystem(int system)
-        {
-            if (system < 0 || system >= systemBoundaries.Count)
-                throw new ArgumentException("Invalid system index");
-            int firstBeat = systemBoundaries[system];
-            if (system == systemBoundaries.Count - 1)
-                return totalBeats - firstBeat;
-            else
-                return systemBoundaries[system + 1] - firstBeat;
-        }
-
-        public Point GetTLHCOfSquare(int beat, int square)
-        {
-            // Origin for top left corner square on page
-
-            Point point = new Point(179 - PixelsMargin, 190 - PixelsMargin);
-
-            // Offset vertically by distance to top of
-            // selected square
-
-            point.Y += PixelsPerSquare * 
-                (IndexOfSystemOnPageForBeat(beat) * (VerticalSquares + 1) + square);
-
-            // Offset horizontally by distance to left of
-            // selected square
-
-            point.X += PixelsPerSquare *
-                (beat - systemBoundaries[IndexOfSystemForBeat(beat)]);
-            return point;
-        }
-
-        public Image RenderScorePage(int page)
+        public Image RenderPage(int page)
         {
             // Assume 300dpi on A4 paper, which is
             // 297 by 210 mm. Hence we are painting
@@ -198,117 +127,163 @@ namespace HBScore
             // of 179px, i.e. in each case slightly
             // more than 1/2 inch.
 
+            int bmpHeight = 2480;
             Bitmap bmp = new Bitmap
-                (3508 - 2*PixelsMargin, 2480 - 2*PixelsMargin, PixelFormat.Format32bppArgb);
+                (3508 - 2 * PixelsMargin, bmpHeight - 2 * PixelsMargin, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(bmp))
-            {
                 g.FillRectangle(Brushes.White, 0, 0, 3507, 2480);
-                for (int system = page * SystemsPerPage; system < systemBoundaries.Count; system++)
-                {
-                    int systemInPage = system % SystemsPerPage;
 
-                    // Draw the border around the whole system
+            // Walk the set of systems on this page
 
-                    Pen thickPen = new Pen(Color.Black, 10);
-                    Pen thinPen = new Pen(Color.Black, 4);
-
-                    int firstBeat = systemBoundaries[systemInPage + page * SystemsPerPage];
-                    int beatsInSystem = BeatsInSystem(systemInPage + page * SystemsPerPage);
-                    Size systemSize = new Size
-                        (
-                            PixelsPerSquare * beatsInSystem,
-                            PixelsPerSquare * VerticalSquares
-                        );
-                    Rectangle systemBorder = new Rectangle
-                        (
-                            GetTLHCOfSquare(firstBeat, 0),
-                            systemSize
-                        );
-                    g.DrawRectangle(thickPen, systemBorder);
-
-                    // Draw each vertical line in the system
-
-                    for (int beat = firstBeat + 1; beat < firstBeat + beatsInSystem; beat++)
-                    {
-                        Point upper = GetTLHCOfSquare(beat, 0);
-                        Point lower = new Point(upper.X, upper.Y + VerticalSquares * PixelsPerSquare);
-                        Pen p = barBoundaries.Contains(beat) ? thickPen : thinPen;
-                        g.DrawLine(p, upper, lower);
-                    }
-
-                    // Draw each horizontal line in the system
-
-                    for(int square = 1; square < VerticalSquares; square++)
-                    {
-                        Point left = GetTLHCOfSquare(firstBeat, square);
-                        Point right = new Point(left.X + beatsInSystem * PixelsPerSquare, left.Y);
-                        g.DrawLine(thinPen, left, right);
-                    }
-                }
-            }
-            for (int i = IndexOfFirstBarOfPage(page); i < IndexOfFirstBarOfPage(page + 1); i++)
+            int system = page * SystemsPerPage;
+            while (system < systemBoundaries.Count && system < (page + 1) * SystemsPerPage)
             {
-                IMeasure m = Score.Measures[i];
-                int firstBeatOfBar = barBoundaries[i];
-                foreach(INote note in m.Notes)
-                    BlankBackgroundForNote(bmp, note, firstBeatOfBar, Score.UseFlats);
-                foreach (INote note in m.Notes)
-                    AddNote(bmp, note, firstBeatOfBar, Score.UseFlats);
+                // Find the set of bars in this system
+
+                int firstBarOfSystemIdx = IndexOfFirstBarOfSystem(system);
+                int firstBarBeyondSystemIdx = IndexOfFirstBarOfSystem(system + 1);
+                var measures = Score.Measures
+                    .Skip(firstBarOfSystemIdx)
+                    .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
+                Point tlhc = new Point(179 - PixelsMargin, 190 - PixelsMargin);
+                tlhc.Offset(0, PixelsPerSquare * (VerticalSquares + 1) * (system % SystemsPerPage));
+                RenderMeasures(bmp, tlhc, PixelsPerSquare, firstBarOfSystemIdx, Score.UseFlats, measures);
+                system++;
             }
             return bmp;
         }
 
-        public Image AddNote(Image image, INote note, int firstBeatOfBar, bool useFlats)
+        public void RenderMeasures(Image img, Point tlhc, int pixelsPerSquare, 
+            int barNum, bool useFlats, IEnumerable<IMeasure> measures)
         {
-            using (Graphics g = Graphics.FromImage(image))
+            Font barNumFont = new Font("Arial Rounded MT", pixelsPerSquare/6);
+            Pen thickPen = new Pen(Color.Black, pixelsPerSquare/15);
+            Pen thinPen = new Pen(Color.Black, pixelsPerSquare/36);
+            Graphics g = Graphics.FromImage(img);
+
+            var beatsInSystem = measures.Sum(m => m.BeatsPerBar);
+
+            // Draw the border around the whole system
+
+            Size systemSize = new Size
+                (
+                    pixelsPerSquare * beatsInSystem,
+                    pixelsPerSquare * VerticalSquares
+                );
+            Rectangle systemBorder = new Rectangle(tlhc, systemSize);
+            g.DrawRectangle(thickPen, systemBorder);
+
+            // Draw each vertical line in the system
+
+            Point upper = tlhc;
+            Point lower = new Point
+                (upper.X, upper.Y + pixelsPerSquare * VerticalSquares);
+
+            foreach (Measure m in measures)
             {
-                // Calculate horizontal position of note
-                int pixelsIntoBar = note.Offset * PixelsPerSquare / 4;
-                Point noteCentre = GetTLHCOfSquare(firstBeatOfBar, 0);
-                noteCentre.Offset(pixelsIntoBar + PixelsPerSquare / 2,
-                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * PixelsPerSquare / 3);
-                Font font = new Font("Arial Rounded MT", 48, FontStyle.Bold);
-                Font accFont = new Font("Arial Rounded MT", 32, FontStyle.Bold);
-                StringFormat sf = new StringFormat();
-                sf.Alignment = StringAlignment.Center;
-                sf.LineAlignment = StringAlignment.Center;
-                string noteStr = note.ToString(useFlats);
-                var size = g.MeasureString(noteStr.Substring(0, 1), font);
-                g.DrawString(noteStr.Substring(0,1), font, Brushes.Black, noteCentre, sf);
-                if(noteStr.Length > 1)
-                    g.DrawString(noteStr.Substring(1), accFont, Brushes.Black, 
-                        new PointF(noteCentre.X + size.Width/2, noteCentre.Y-16), sf);
+                for (int beat = 0; beat < m.BeatsPerBar; beat++)
+                {
+                    if (beat == 0)
+                    {
+                        g.DrawString((++barNum).ToString(),
+                            barNumFont, Brushes.Black, new Point
+                            (upper.X, upper.Y - pixelsPerSquare/4 - 4));
+                        if (m != measures.First())
+                            g.DrawLine(thickPen, upper, lower);
+                    }
+                    else
+                        g.DrawLine(thinPen, upper, lower);
+                    upper.Offset(pixelsPerSquare, 0);
+                    lower.Offset(pixelsPerSquare, 0);
+                }
             }
-            return null;
+
+            // Draw each horizontal line in the system
+
+            Point left = tlhc;
+            Point right = new Point(left.X + beatsInSystem * pixelsPerSquare, left.Y);
+            for (int square = 1; square < VerticalSquares; square++)
+            {
+                left.Offset(0, pixelsPerSquare);
+                right.Offset(0, pixelsPerSquare);
+                g.DrawLine(thinPen, left, right);
+            }
+
+            // White out any areas where characters will be written
+
+            Point barStart = tlhc;
+            foreach(IMeasure m in measures)
+            {
+                foreach(INote note in m.Notes)
+                    InsertBlank(img, note, barStart, useFlats, pixelsPerSquare);
+                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+            }
+
+            // Write the notes to the score
+
+            barStart = tlhc;
+            foreach (IMeasure m in measures)
+            {
+                foreach (INote note in m.Notes)
+                    InsertNote(img, note, barStart, useFlats, pixelsPerSquare);
+                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+            }
+            g.Dispose();
+            barNumFont.Dispose();
+            thinPen.Dispose();
+            thickPen.Dispose();
         }
-        public Image BlankBackgroundForNote(Image image, INote note, int firstBeatOfBar, bool useFlats)
+
+        private void InsertNote(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
         {
-            using (Graphics g = Graphics.FromImage(image))
+            using (Graphics g = Graphics.FromImage(img))
             {
                 // Calculate horizontal position of note
-                int pixelsIntoBar = note.Offset * PixelsPerSquare / 4;
-                Point noteCentre = GetTLHCOfSquare(firstBeatOfBar, 0);
-                noteCentre.Offset(pixelsIntoBar + PixelsPerSquare / 2,
-                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * PixelsPerSquare / 3);
-                Font font = new Font("Arial Rounded MT", 48, FontStyle.Bold);
-                Font accFont = new Font("Arial Rounded MT", 32, FontStyle.Bold);
+                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                Point noteCentre = barStart;
+                noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
+                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
+                Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
+                Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
                 StringFormat sf = new StringFormat();
                 sf.Alignment = StringAlignment.Center;
                 sf.LineAlignment = StringAlignment.Center;
                 string noteStr = note.ToString(useFlats);
                 var size = g.MeasureString(noteStr.Substring(0, 1), font);
-                g.FillRectangle(Brushes.White, noteCentre.X - size.Width / 2, 
+                g.DrawString(noteStr.Substring(0, 1), font, Brushes.Black, noteCentre, sf);
+                if (noteStr.Length > 1)
+                    g.DrawString(noteStr.Substring(1), accFont, Brushes.Black,
+                        new PointF(noteCentre.X + size.Width / 2, noteCentre.Y - pixelsPerSquare / 10), sf);
+            }
+        }
+
+        private void InsertBlank(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
+        {
+            using (Graphics g = Graphics.FromImage(img))
+            {
+                // Calculate horizontal position of note
+                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                Point noteCentre = barStart;
+                noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
+                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
+                Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
+                Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
+                StringFormat sf = new StringFormat();
+                sf.Alignment = StringAlignment.Center;
+                sf.LineAlignment = StringAlignment.Center;
+                string noteStr = note.ToString(useFlats);
+                var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                g.FillRectangle(Brushes.White, noteCentre.X - size.Width / 2,
                     noteCentre.Y - size.Height / 2, size.Width, size.Height);
                 if (noteStr.Length > 1)
                 {
                     var accSize = g.MeasureString(noteStr.Substring(1), accFont);
-                    g.FillRectangle(Brushes.White, 
-                        noteCentre.X + size.Width / 2 - accSize.Width / 2, 
-                        noteCentre.Y - 16 - accSize.Height / 2, 
+                    g.FillRectangle(Brushes.White,
+                        noteCentre.X + size.Width / 2 - accSize.Width / 2,
+                        noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
                         accSize.Width, accSize.Height);
                 }
             }
-            return null;
         }
     }
 }

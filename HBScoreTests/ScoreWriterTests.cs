@@ -1,22 +1,23 @@
 using System;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using HBScore;
 using System.Drawing;
 
-namespace HBScoreTest
+namespace HBScoreTests
 {
+    [TestClass]
     public class ScoreWriterTests
     {
-        [Fact]
+        [TestMethod]
         public void CreateEmptyScore()
         {
             ScoreWriter sw = new ScoreWriter(22, 3, false, 6, false);
-            Image img = sw.RenderScorePage(0);
+            Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\myScore.bmp");
-            Assert.NotNull(img);
+            Assert.IsNotNull(img);
         }
 
-        [Fact]
+        [TestMethod]
         public void CreateOddBarScore()
         {
             ScoreFactory sf = new ScoreFactory();
@@ -28,12 +29,12 @@ namespace HBScoreTest
             score.Measures.Add(sf.CreateMeasure(3, false));
             score.Measures.Add(sf.CreateMeasure(4, false));
             ScoreWriter sw = new ScoreWriter(score, 6);
-            Image img = sw.RenderScorePage(0);
+            Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\varBarScore.bmp");
-            Assert.NotNull(img);
+            Assert.IsNotNull(img);
         }
 
-        [Fact]
+        [TestMethod]
         public void CreateScoreWithSharps()
         {
             ScoreFactory sf = new ScoreFactory();
@@ -47,12 +48,12 @@ namespace HBScoreTest
             score.Measures[0].Notes.Add(sf.CreateNote(14, 40, 4));
             score.Measures[1].Notes.Add(sf.CreateNote(0, 42, 4));
             ScoreWriter sw = new ScoreWriter(score, 6);
-            Image img = sw.RenderScorePage(0);
+            Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\sharpScore.bmp");
-            Assert.NotNull(img);
+            Assert.IsNotNull(img);
         }
 
-        [Fact]
+        [TestMethod]
         public void CreateScoreWithFlats()
         {
             ScoreFactory sf = new ScoreFactory();
@@ -66,9 +67,9 @@ namespace HBScoreTest
             score.Measures[0].Notes.Add(sf.CreateNote(14, 40, 4));
             score.Measures[1].Notes.Add(sf.CreateNote(0, 42, 4));
             ScoreWriter sw = new ScoreWriter(score, 6);
-            Image img = sw.RenderScorePage(0);
+            Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\flatScore.bmp");
-            Assert.NotNull(img);
+            Assert.IsNotNull(img);
         }
     }
 }

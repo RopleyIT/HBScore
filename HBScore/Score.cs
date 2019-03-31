@@ -78,9 +78,9 @@ namespace HBScore
         /// <summary>
         /// The notes themselves. These are formatted as follows:
         /// 1 = 01C, 2 = 02B, 3 = 03A#, 4 = 03A, 5 = 04G#, 6 = 04G,
-        /// 7 = 05F#, 8 = 05F, 9 = 06E, 10 = 07D#, 11 = 07D, 12 = 08C#.
+        /// 7 = 05F#, 8 = 05F, 9 = 06E, 10 = 07D#, 11 = 07D, 12 = 1C#.
         /// Each octave below this adds multiples of 12 to the note value.
-        /// Hence 25 = 15C, and 30 = 18G.
+        /// Hence 37 = 15C, and 42 = 18G.
         /// </summary>
 
         public int Pitch { get; private set; }
