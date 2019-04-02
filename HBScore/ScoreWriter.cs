@@ -88,7 +88,6 @@ namespace HBScore
         List<int> pageBoundaries;
         List<int> systemBoundaries;
         List<int> barBoundaries;
-        int totalBeats;
 
         private void ListPages()
         {
@@ -107,7 +106,6 @@ namespace HBScore
                 }
                 beats += m.BeatsPerBar;
             }
-            totalBeats = beats;
         }
 
         private int IndexOfFirstBarOfSystem(int system)
@@ -245,9 +243,11 @@ namespace HBScore
                     (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
                 Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
                 Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
-                StringFormat sf = new StringFormat();
-                sf.Alignment = StringAlignment.Center;
-                sf.LineAlignment = StringAlignment.Center;
+                StringFormat sf = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
                 string noteStr = note.ToString(useFlats);
                 var size = g.MeasureString(noteStr.Substring(0, 1), font);
                 g.DrawString(noteStr.Substring(0, 1), font, Brushes.Black, noteCentre, sf);
@@ -268,9 +268,11 @@ namespace HBScore
                     (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
                 Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
                 Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
-                StringFormat sf = new StringFormat();
-                sf.Alignment = StringAlignment.Center;
-                sf.LineAlignment = StringAlignment.Center;
+                StringFormat sf = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
                 string noteStr = note.ToString(useFlats);
                 var size = g.MeasureString(noteStr.Substring(0, 1), font);
                 g.FillRectangle(Brushes.White, noteCentre.X - size.Width / 2,

@@ -12,7 +12,7 @@ namespace HBScore
     public class Score : IScore
     {
         public IList<IMeasure> Measures { get; private set; }
-        public bool UseFlats { get; private set; }
+        public bool UseFlats { get; set; }
 
         public int MinVerticalOffset
         {
@@ -144,18 +144,18 @@ namespace HBScore
 
         private static int[] sharpOffsets =
         {
-            0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 7, 8
+            0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 7
         };
 
         private static int[] flatOffsets =
         {
-            0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7
+            0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7
         };
 
         public int VerticalOffset(bool useFlats)
         {
             int noteIndex = (Pitch - 1) % 12;
-            return 8 * ((Pitch - 1) / 12) + 
+            return 7 * ((Pitch - 1) / 12) + 
                 (useFlats ? flatOffsets[noteIndex] : sharpOffsets[noteIndex]);
         }
     }

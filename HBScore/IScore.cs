@@ -19,7 +19,7 @@ namespace HBScore
         /// note below followed by the sharp sign.
         /// </summary>
 
-        bool UseFlats { get; }
+        bool UseFlats { get; set; }
 
         /// <summary>
         /// The vertical offset value for the highest note
