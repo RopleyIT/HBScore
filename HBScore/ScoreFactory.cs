@@ -13,6 +13,6 @@ namespace HBScore
             => new Measure(beats, compound);
 
         public INote CreateNote(int offset, int pitch, int duration)
-            => new Note(offset, pitch, duration);
+            => new ColouredNote(offset, pitch, duration);
     }
 }

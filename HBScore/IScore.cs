@@ -7,6 +7,14 @@ namespace HBScore
     public interface IScore
     {
         /// <summary>
+        /// Information about the piece of music
+        /// </summary>
+        string Title { get; set; }
+        string Composer { get; set; }
+        string Information { get; set; }
+        string NoteList { get; }
+        
+        /// <summary>
         /// The collection of bars or measures in the score
         /// </summary>
 
@@ -87,7 +95,7 @@ namespace HBScore
         /// The length of the note in 1/4 beats
         /// </summary>
 
-        int Duration { get; }
+        int Duration { get; set; }
 
         /// <summary>
         /// Generate the output string corresponding to the selected note

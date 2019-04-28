@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Drawing;
 
 namespace HBScore
 {
@@ -9,8 +10,26 @@ namespace HBScore
     /// Representation of the data structures for a piece of music
     /// </summary>
 
+    [Serializable]
     public class Score : IScore
     {
+        public string Title { get; set; }
+        public string Composer { get; set; }
+        public string Information { get; set; }
+        public string NoteList
+        {
+            get
+            {
+                var notesPitches = Measures
+                    .SelectMany(m => m.Notes)
+                    .Select(n => n.Pitch)
+                    .Distinct()
+                    .OrderBy(i => i)
+                    .Select(p => Note.NoteString(p));
+                return string.Join(", ", notesPitches);
+            }
+        }
+
         public IList<IMeasure> Measures { get; private set; }
         public bool UseFlats { get; set; }
 
@@ -47,6 +66,7 @@ namespace HBScore
     /// One bar in the score
     /// </summary>
 
+    [Serializable]
     public class Measure : IMeasure
     {
         public int BeatsPerBar { get; private set; }
@@ -63,6 +83,7 @@ namespace HBScore
         }
     }
 
+    [Serializable]
     public class Note : INote
     {
         /// <summary>
@@ -89,7 +110,7 @@ namespace HBScore
         /// The length of the note in 1/4 beats
         /// </summary>
 
-        public int Duration { get; private set; }
+        public int Duration { get; set; }
 
         public Note(int offset, int pitch, int duration)
         {
@@ -98,6 +119,7 @@ namespace HBScore
             Duration = duration;
         }
 
+        [NonSerialized]
         private static string[] sharpStrings =
         {
             "C",
@@ -114,6 +136,7 @@ namespace HBScore
             "C#"
         };
 
+        [NonSerialized]
         private static string[] flatStrings =
         {
             "C",
@@ -130,11 +153,16 @@ namespace HBScore
             "D\u266D"
         };
 
+        public static string NoteName(int pitch, bool useFlats)
+        {
+            int noteIndex = (pitch - 1) % 12;
+            return useFlats ?
+                flatStrings[noteIndex] : sharpStrings[noteIndex];
+        }
+
         public string ToString(bool useFlats)
         {
-            int noteIndex = (Pitch - 1) % 12;
-            return useFlats ? 
-                flatStrings[noteIndex] : sharpStrings[noteIndex];
+            return NoteName(Pitch, useFlats);
         }
 
         public override string ToString()
@@ -142,21 +170,90 @@ namespace HBScore
             return ToString(false);
         }
 
+        [NonSerialized]
         private static int[] sharpOffsets =
         {
-            0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 7
+            0, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7
         };
 
+        [NonSerialized]
         private static int[] flatOffsets =
         {
-            0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7
+            0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6
         };
 
         public int VerticalOffset(bool useFlats)
         {
-            int noteIndex = (Pitch - 1) % 12;
-            return 7 * ((Pitch - 1) / 12) + 
+            return BellNumber(Pitch, useFlats);
+        }
+
+        public static int BellNumber(int pitch, bool useFlats)
+        {
+            int noteIndex = (pitch - 1) % 12;
+            return 7 * ((pitch - 1) / 12) +
                 (useFlats ? flatOffsets[noteIndex] : sharpOffsets[noteIndex]);
+        }
+
+        public static string NoteString(int pitch)
+        {
+            string noteString;
+            int bellNum = BellNumber(pitch, false);
+            if (bellNum < 7)
+                noteString = "0" + (1 + bellNum) + NoteName(pitch, false);
+            else
+                noteString = (bellNum - 6) + NoteName(pitch, false);
+            if (noteString.EndsWith("#"))
+            {
+                bellNum = BellNumber(pitch, true);
+                if (bellNum < 7)
+                    noteString += "/0" + (1 + bellNum) + NoteName(pitch, true);
+                else
+                    noteString += "/" + (bellNum - 6) + NoteName(pitch, true);
+            }
+            return noteString;
+        }
+
+        public virtual Color ForeColour
+        {
+            get
+            {
+                return Color.Black;
+            }
+            set
+            { }
+        }
+
+        public virtual Color BackColour
+        {
+            get
+            {
+                return Color.White;
+            }
+            set
+            { }
+        }
+    }
+
+    [Serializable]
+    public class ColouredNote : Note
+    {
+        public ColouredNote(int offset, int pitch, int duration)
+            : base(offset, pitch, duration)
+        {
+            ForeColour = Color.Black;
+            BackColour = Color.White;
+        }
+
+        public override Color ForeColour
+        {
+            get;
+            set;
+        }
+
+        public override Color BackColour
+        {
+            get;
+            set;
         }
     }
 }

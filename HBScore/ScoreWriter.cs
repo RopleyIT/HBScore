@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace HBScore
 {
-    public class ScoreWriter
+    public class ScoreWriter : IDisposable
     {
         public const int PixelsPerInch = 300;
         public const int PixelsPerSquare = 150;
@@ -81,9 +81,14 @@ namespace HBScore
                 VerticalSquares = squares;
             ListPages();
             RenderedPages = new List<Image>(pageBoundaries.Count);
+            RenderedPages.Add(RenderTitlePage());
             for (int i = 0; i < pageBoundaries.Count; i++)
                 RenderedPages.Add(RenderPage(i));
         }
+
+        public void SavePDF(string outputPath) =>
+            PDFScoreWriter.GeneratePDF(RenderedPages, outputPath, 
+                Score.Title, Score.Composer, Score.Information, Score.NoteList);
 
         List<int> pageBoundaries;
         List<int> systemBoundaries;
@@ -112,6 +117,33 @@ namespace HBScore
             => system >= systemBoundaries.Count ?
             barBoundaries.Count :
             barBoundaries.IndexOf(systemBoundaries[system]);
+
+        public Image RenderTitlePage()
+        {
+            int bmpHeight = 2480;
+            Bitmap bmp = new Bitmap
+                (3508 - 2 * PixelsMargin, bmpHeight - 2 * PixelsMargin, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(bmp);
+            g.FillRectangle(Brushes.White, 0, 0, 3507, 2480);
+            Font titleFont = new Font("Arial Rounded MT", 96, FontStyle.Bold);
+            Font subTitleFont = new Font("Arial Rounded MT", 48, FontStyle.Regular);
+
+            StringFormat sf = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+            g.DrawString(Score.Title, titleFont, Brushes.Black, 1753, 800, sf);
+            g.DrawString(Score.Composer, subTitleFont, Brushes.Black, 1753, 960, sf);
+            g.DrawString(Score.Information, subTitleFont, Brushes.Black, 1753, 1120, sf);
+            g.DrawString(Score.NoteList, subTitleFont, Brushes.Black, 
+                new RectangleF(300, 1280, 2908, 600), sf);
+
+            subTitleFont.Dispose();
+            titleFont.Dispose();
+            g.Dispose();
+            return bmp;
+        }
 
         public Image RenderPage(int page)
         {
@@ -145,14 +177,14 @@ namespace HBScore
                     .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
                 Point tlhc = new Point(179 - PixelsMargin, 190 - PixelsMargin);
                 tlhc.Offset(0, PixelsPerSquare * (VerticalSquares + 1) * (system % SystemsPerPage));
-                RenderMeasures(bmp, tlhc, PixelsPerSquare, firstBarOfSystemIdx, Score.UseFlats, measures);
+                RenderMeasures(bmp, tlhc, PixelsPerSquare, firstBarOfSystemIdx, Score.UseFlats, measures, null);
                 system++;
             }
             return bmp;
         }
 
         public void RenderMeasures(Image img, Point tlhc, int pixelsPerSquare, 
-            int barNum, bool useFlats, IEnumerable<IMeasure> measures)
+            int barNum, bool useFlats, IEnumerable<IMeasure> measures, INote selectedNote)
         {
             Font barNumFont = new Font("Arial Rounded MT", pixelsPerSquare/6);
             Pen thickPen = new Pen(Color.Black, pixelsPerSquare/15);
@@ -223,7 +255,7 @@ namespace HBScore
             foreach (IMeasure m in measures)
             {
                 foreach (INote note in m.Notes)
-                    InsertNote(img, note, barStart, useFlats, pixelsPerSquare);
+                    InsertNote(img, note, barStart, useFlats, pixelsPerSquare, note == selectedNote);
                 barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
             }
             g.Dispose();
@@ -232,7 +264,7 @@ namespace HBScore
             thickPen.Dispose();
         }
 
-        private void InsertNote(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
+        private void InsertNote(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare, bool selected)
         {
             using (Graphics g = Graphics.FromImage(img))
             {
@@ -241,19 +273,28 @@ namespace HBScore
                 Point noteCentre = barStart;
                 noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
                     (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
-                Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
-                Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
-                StringFormat sf = new StringFormat
+                using (Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold))
+                using (Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold))
                 {
-                    Alignment = StringAlignment.Center,
-                    LineAlignment = StringAlignment.Center
-                };
-                string noteStr = note.ToString(useFlats);
-                var size = g.MeasureString(noteStr.Substring(0, 1), font);
-                g.DrawString(noteStr.Substring(0, 1), font, Brushes.Black, noteCentre, sf);
-                if (noteStr.Length > 1)
-                    g.DrawString(noteStr.Substring(1), accFont, Brushes.Black,
-                        new PointF(noteCentre.X + size.Width / 2, noteCentre.Y - pixelsPerSquare / 10), sf);
+                    StringFormat sf = new StringFormat
+                    {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
+                    string noteStr = note.ToString(useFlats);
+                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
+                    {
+                        g.DrawString(noteStr.Substring(0, 1), font, txtBrush, noteCentre, sf);
+                        if (noteStr.Length > 1)
+                            g.DrawString(noteStr.Substring(1), accFont, txtBrush,
+                                new PointF(noteCentre.X + size.Width / 2, noteCentre.Y - pixelsPerSquare / 10), sf);
+                        if (note.Duration > 4)
+                            using (Pen p = new Pen(txtBrush, pixelsPerSquare / 36.0f))
+                                g.DrawLine(p, noteCentre.X + size.Width, noteCentre.Y - pixelsPerSquare / 10,
+                                    noteCentre.X + pixelsPerSquare * (note.Duration / 4 - 1), noteCentre.Y - pixelsPerSquare / 10);
+                    }
+                }
             }
         }
 
@@ -266,26 +307,100 @@ namespace HBScore
                 Point noteCentre = barStart;
                 noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
                     (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
-                Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold);
-                Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold);
-                StringFormat sf = new StringFormat
+                using (Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold))
+                using (Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold))
                 {
-                    Alignment = StringAlignment.Center,
-                    LineAlignment = StringAlignment.Center
-                };
-                string noteStr = note.ToString(useFlats);
-                var size = g.MeasureString(noteStr.Substring(0, 1), font);
-                g.FillRectangle(Brushes.White, noteCentre.X - size.Width / 2,
-                    noteCentre.Y - size.Height / 2, size.Width, size.Height);
-                if (noteStr.Length > 1)
-                {
-                    var accSize = g.MeasureString(noteStr.Substring(1), accFont);
-                    g.FillRectangle(Brushes.White,
-                        noteCentre.X + size.Width / 2 - accSize.Width / 2,
-                        noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
-                        accSize.Width, accSize.Height);
+                    StringFormat sf = new StringFormat
+                    {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
+                    string noteStr = note.ToString(useFlats);
+                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    using (Brush fillBrush = new SolidBrush((note as ColouredNote).BackColour))
+                    {
+                        g.FillRectangle(fillBrush, noteCentre.X - size.Width / 2,
+                            noteCentre.Y - size.Height / 2, size.Width, size.Height);
+                        if (noteStr.Length > 1)
+                        {
+                            var accSize = g.MeasureString(noteStr.Substring(1), accFont);
+                            g.FillRectangle(fillBrush,
+                                noteCentre.X + size.Width / 2 - accSize.Width / 2,
+                                noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
+                                accSize.Width, accSize.Height);
+                        }
+                    }
                 }
             }
         }
+
+        public INote FindNoteFromMouseCoordinates(Point mousePt, Image img, Point tlhc, int pixelsPerSquare,
+            bool useFlats, IEnumerable<IMeasure> measures)
+        {
+            Point barStart = tlhc;
+            foreach (IMeasure m in measures)
+            {
+                foreach (INote n in m.Notes)
+                    if (NoteHitTest(mousePt, img, n, barStart, useFlats, pixelsPerSquare))
+                        return n;
+                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+            }
+            return null;
+        }
+
+        private bool NoteHitTest(Point mousePt, Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
+        {
+            using (Graphics g = Graphics.FromImage(img))
+            {
+                // Calculate horizontal position of note
+                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                Point noteCentre = barStart;
+                noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
+                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
+                using (Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold))
+                using (Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold))
+                {
+                    StringFormat sf = new StringFormat
+                    {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
+                    string noteStr = note.ToString(useFlats);
+                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    if ((new RectangleF(noteCentre.X - size.Width / 2,
+                        noteCentre.Y - size.Height / 2, size.Width, size.Height)).Contains(mousePt))
+                        return true;
+                    if (noteStr.Length > 1)
+                    {
+                        var accSize = g.MeasureString(noteStr.Substring(1), accFont);
+                        if ((new RectangleF(noteCentre.X + size.Width / 2 - accSize.Width / 2,
+                            noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
+                            accSize.Width, accSize.Height)).Contains(mousePt))
+                            return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                    foreach (var page in RenderedPages)
+                        page.Dispose();
+
+                RenderedPages.Clear();
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose() => Dispose(true);
+        #endregion
     }
 }

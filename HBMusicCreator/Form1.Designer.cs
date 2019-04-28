@@ -34,12 +34,16 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printToPDFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.beforeCurrentBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.afterCurrentBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gotoBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timeSignatureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scoreinformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btn20e = new System.Windows.Forms.Button();
             this.btn21d = new System.Windows.Forms.Button();
             this.btn22c = new System.Windows.Forms.Button();
@@ -105,6 +109,18 @@
             this.btnLast = new System.Windows.Forms.Button();
             this.btnRight = new System.Windows.Forms.Button();
             this.btnFirst = new System.Windows.Forms.Button();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.cbTimeSignature = new System.Windows.Forms.ComboBox();
+            this.chkUseFlats = new System.Windows.Forms.CheckBox();
+            this.savePDFDialog = new System.Windows.Forms.SaveFileDialog();
+            this.cbxBeats = new System.Windows.Forms.ComboBox();
+            this.colorDialog = new System.Windows.Forms.ColorDialog();
+            this.recolourOnClickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textColourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
             this.mnuMainForm.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbxScore)).BeginInit();
@@ -115,7 +131,8 @@
             this.mnuMainForm.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.mnuMainForm.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.mnuMainForm.Location = new System.Drawing.Point(0, 0);
             this.mnuMainForm.Name = "mnuMainForm";
             this.mnuMainForm.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
@@ -130,6 +147,7 @@
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
+            this.printToPDFToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 22);
@@ -138,68 +156,109 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.newToolStripMenuItem.Text = "&New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.openToolStripMenuItem.Text = "&Open ...";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.saveToolStripMenuItem.Text = "&Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As ...";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.SaveAsToolStripMenuItem_Click);
+            // 
+            // printToPDFToolStripMenuItem
+            // 
+            this.printToPDFToolStripMenuItem.Name = "printToPDFToolStripMenuItem";
+            this.printToPDFToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.printToPDFToolStripMenuItem.Text = "&Print to PDF ...";
+            this.printToPDFToolStripMenuItem.Click += new System.EventHandler(this.PrintToPDFToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newBarToolStripMenuItem,
             this.deleteBarToolStripMenuItem,
-            this.gotoBarToolStripMenuItem,
-            this.timeSignatureToolStripMenuItem});
+            this.scoreinformationToolStripMenuItem,
+            this.recolourOnClickToolStripMenuItem,
+            this.textColourToolStripMenuItem,
+            this.textBackgroundToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
             this.editToolStripMenuItem.Text = "&Edit";
             // 
             // newBarToolStripMenuItem
             // 
+            this.newBarToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.beforeCurrentBarToolStripMenuItem,
+            this.afterCurrentBarToolStripMenuItem});
             this.newBarToolStripMenuItem.Name = "newBarToolStripMenuItem";
-            this.newBarToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.newBarToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.newBarToolStripMenuItem.Text = "&New bar";
+            // 
+            // beforeCurrentBarToolStripMenuItem
+            // 
+            this.beforeCurrentBarToolStripMenuItem.Name = "beforeCurrentBarToolStripMenuItem";
+            this.beforeCurrentBarToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.beforeCurrentBarToolStripMenuItem.Text = "&Before current bar";
+            this.beforeCurrentBarToolStripMenuItem.Click += new System.EventHandler(this.BeforeCurrentBarToolStripMenuItem_Click);
+            // 
+            // afterCurrentBarToolStripMenuItem
+            // 
+            this.afterCurrentBarToolStripMenuItem.Name = "afterCurrentBarToolStripMenuItem";
+            this.afterCurrentBarToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.afterCurrentBarToolStripMenuItem.Text = "&After current bar";
+            this.afterCurrentBarToolStripMenuItem.Click += new System.EventHandler(this.AfterCurrentBarToolStripMenuItem_Click);
             // 
             // deleteBarToolStripMenuItem
             // 
             this.deleteBarToolStripMenuItem.Name = "deleteBarToolStripMenuItem";
-            this.deleteBarToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.deleteBarToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.deleteBarToolStripMenuItem.Text = "&Delete bar";
+            this.deleteBarToolStripMenuItem.Click += new System.EventHandler(this.DeleteBarToolStripMenuItem_Click);
             // 
-            // gotoBarToolStripMenuItem
+            // scoreinformationToolStripMenuItem
             // 
-            this.gotoBarToolStripMenuItem.Name = "gotoBarToolStripMenuItem";
-            this.gotoBarToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.gotoBarToolStripMenuItem.Text = "&Goto bar ...";
+            this.scoreinformationToolStripMenuItem.Name = "scoreinformationToolStripMenuItem";
+            this.scoreinformationToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.scoreinformationToolStripMenuItem.Text = "Score &information ...";
+            this.scoreinformationToolStripMenuItem.Click += new System.EventHandler(this.ScoreinformationToolStripMenuItem_Click);
             // 
-            // timeSignatureToolStripMenuItem
+            // helpToolStripMenuItem
             // 
-            this.timeSignatureToolStripMenuItem.Name = "timeSignatureToolStripMenuItem";
-            this.timeSignatureToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.timeSignatureToolStripMenuItem.Text = "&Time signature ...";
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
+            this.helpToolStripMenuItem.Text = "&Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.aboutToolStripMenuItem.Text = "&About ...";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
             // btn20e
             // 
@@ -1153,7 +1212,7 @@
             this.pbxScore.Size = new System.Drawing.Size(1012, 360);
             this.pbxScore.TabIndex = 4;
             this.pbxScore.TabStop = false;
-            this.pbxScore.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PnlPointer_MouseClick);
+            this.pbxScore.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PbxScore_MouseClick);
             // 
             // pnlPointer
             // 
@@ -1217,11 +1276,115 @@
             this.btnFirst.UseVisualStyleBackColor = true;
             this.btnFirst.Click += new System.EventHandler(this.BtnFirst_Click);
             // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog1";
+            // 
+            // cbTimeSignature
+            // 
+            this.cbTimeSignature.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbTimeSignature.FormattingEnabled = true;
+            this.cbTimeSignature.Items.AddRange(new object[] {
+            "2:4",
+            "6:8",
+            "3:4",
+            "9:8",
+            "4:4",
+            "12:8",
+            "5:4",
+            "7:4"});
+            this.cbTimeSignature.Location = new System.Drawing.Point(9, 527);
+            this.cbTimeSignature.Name = "cbTimeSignature";
+            this.cbTimeSignature.Size = new System.Drawing.Size(66, 21);
+            this.cbTimeSignature.TabIndex = 10;
+            // 
+            // chkUseFlats
+            // 
+            this.chkUseFlats.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chkUseFlats.AutoSize = true;
+            this.chkUseFlats.Location = new System.Drawing.Point(9, 462);
+            this.chkUseFlats.Name = "chkUseFlats";
+            this.chkUseFlats.Size = new System.Drawing.Size(67, 17);
+            this.chkUseFlats.TabIndex = 11;
+            this.chkUseFlats.Text = "Use flats";
+            this.chkUseFlats.UseVisualStyleBackColor = true;
+            this.chkUseFlats.Click += new System.EventHandler(this.ChkUseFlats_Click);
+            // 
+            // savePDFDialog
+            // 
+            this.savePDFDialog.Title = "PDF output file location";
+            // 
+            // cbxBeats
+            // 
+            this.cbxBeats.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbxBeats.FormattingEnabled = true;
+            this.cbxBeats.Items.AddRange(new object[] {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"});
+            this.cbxBeats.Location = new System.Drawing.Point(956, 527);
+            this.cbxBeats.Name = "cbxBeats";
+            this.cbxBeats.Size = new System.Drawing.Size(67, 21);
+            this.cbxBeats.TabIndex = 12;
+            this.cbxBeats.SelectionChangeCommitted += new System.EventHandler(this.CbxBeats_SelectionChangeCommitted);
+            // 
+            // colorDialog
+            // 
+            this.colorDialog.AnyColor = true;
+            this.colorDialog.FullOpen = true;
+            // 
+            // recolourOnClickToolStripMenuItem
+            // 
+            this.recolourOnClickToolStripMenuItem.CheckOnClick = true;
+            this.recolourOnClickToolStripMenuItem.Name = "recolourOnClickToolStripMenuItem";
+            this.recolourOnClickToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.recolourOnClickToolStripMenuItem.Text = "Recolour on click";
+            // 
+            // textColourToolStripMenuItem
+            // 
+            this.textColourToolStripMenuItem.Name = "textColourToolStripMenuItem";
+            this.textColourToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.textColourToolStripMenuItem.Text = "Text colour ...";
+            this.textColourToolStripMenuItem.Click += new System.EventHandler(this.BtnColour_Click);
+            // 
+            // textBackgroundToolStripMenuItem
+            // 
+            this.textBackgroundToolStripMenuItem.Name = "textBackgroundToolStripMenuItem";
+            this.textBackgroundToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.textBackgroundToolStripMenuItem.Text = "Text background ...";
+            this.textBackgroundToolStripMenuItem.Click += new System.EventHandler(this.BtnBackColour_Click);
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(955, 484);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(63, 39);
+            this.label10.TabIndex = 13;
+            this.label10.Text = "Selected note duration:";
+            // 
+            // label11
+            // 
+            this.label11.Location = new System.Drawing.Point(12, 495);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(63, 28);
+            this.label11.TabIndex = 14;
+            this.label11.Text = "Time signature:";
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1033, 578);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.cbxBeats);
+            this.Controls.Add(this.chkUseFlats);
+            this.Controls.Add(this.cbTimeSignature);
             this.Controls.Add(this.btnFirst);
             this.Controls.Add(this.btnRight);
             this.Controls.Add(this.btnLast);
@@ -1234,6 +1397,7 @@
             this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "FrmMain";
             this.Text = "HB Music Creator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
             this.Load += new System.EventHandler(this.FrmMain_Load);
             this.mnuMainForm.ResumeLayout(false);
             this.mnuMainForm.PerformLayout();
@@ -1256,8 +1420,6 @@
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newBarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteBarToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem gotoBarToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem timeSignatureToolStripMenuItem;
         private System.Windows.Forms.Button btn20e;
         private System.Windows.Forms.Button btn21d;
         private System.Windows.Forms.Button btn22c;
@@ -1323,6 +1485,24 @@
         private System.Windows.Forms.Button btnLast;
         private System.Windows.Forms.Button btnRight;
         private System.Windows.Forms.Button btnFirst;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
+        private System.Windows.Forms.ToolStripMenuItem beforeCurrentBarToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem afterCurrentBarToolStripMenuItem;
+        private System.Windows.Forms.ComboBox cbTimeSignature;
+        private System.Windows.Forms.CheckBox chkUseFlats;
+        private System.Windows.Forms.ToolStripMenuItem printToPDFToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog savePDFDialog;
+        private System.Windows.Forms.ComboBox cbxBeats;
+        private System.Windows.Forms.ToolStripMenuItem scoreinformationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ColorDialog colorDialog;
+        private System.Windows.Forms.ToolStripMenuItem recolourOnClickToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textColourToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textBackgroundToolStripMenuItem;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
     }
 }
 
