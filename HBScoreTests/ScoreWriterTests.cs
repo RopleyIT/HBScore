@@ -1,7 +1,6 @@
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HBScore;
 using System.Drawing;
+using HBScore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HBScoreTests
 {

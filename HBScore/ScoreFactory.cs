@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace HBScore
+﻿namespace HBScore
 {
     public class ScoreFactory : IScoreFactory
     {

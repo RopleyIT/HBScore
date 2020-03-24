@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoteLib
 {
@@ -10,20 +8,19 @@ namespace NoteLib
     /// A musical instrument has a combination of harmonics that remain
     /// the same for that instrument across the range of frequencies.
     /// </summary>
-    
+
     public class Instrument
     {
-        const float MaxToneLength = 15.0f;
-
-        List<Harmonic> timbre;
-        Dictionary<float, float[]> noteSamples = null;
-        int sampleRate;
+        private const float MaxToneLength = 15.0f;
+        private readonly List<Harmonic> timbre;
+        private readonly Dictionary<float, float[]> noteSamples = null;
+        private readonly int sampleRate;
 
         private void AddSamplesForPitch(float pitch)
         {
-            var frequency = Frequency(pitch);
-            var sampleCount = (int)(MaxToneLength * sampleRate + 0.5);
-            var samples = new float[sampleCount];
+            float frequency = Frequency(pitch);
+            int sampleCount = (int)(MaxToneLength * sampleRate + 0.5);
+            float[] samples = new float[sampleCount];
             for (int s = 0; s < sampleCount; s++)
                 samples[s] = Sample(s, frequency);
             noteSamples.Add(pitch, samples);
@@ -68,7 +65,7 @@ namespace NoteLib
         /// </summary>
         /// <param name="pitch">The pitch for which we want samples</param>
         /// <returns>The table of sound samples for this instrument and pitch</returns>
-        
+
         public IEnumerable<float> SamplesForPitch(float pitch)
         {
             InitSamplesForPitch(pitch);
@@ -81,7 +78,7 @@ namespace NoteLib
         /// </summary>
         /// <param name="pitch">The pitch for which
         /// we need samples</param>
-        
+
         public void InitSamplesForPitch(float pitch)
         {
             if (!noteSamples.ContainsKey(pitch))

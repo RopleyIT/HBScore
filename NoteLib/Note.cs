@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoteLib
 {
@@ -18,7 +15,7 @@ namespace NoteLib
         /// <param name="pitch">The pitch of the note</param>
         /// <param name="start">The start beat of the note</param>
         /// <param name="duration">The duration of the note</param>
-        
+
         public Note(Instrument instrument, float amplitude, float pitch, float start, float duration)
         {
             Instrument = instrument;
@@ -34,14 +31,14 @@ namespace NoteLib
         /// the other notes being played. 1.0 is the normal
         /// amplitude, so this is a scale factor relative to that.
         /// </summary>
-        
+
         public float Amplitude { get; private set; }
-        
+
         /// <summary>
         /// The combination of harmonics with their amplitudes,
         /// decay rates and pitches
         /// </summary>
-        
+
         public Instrument Instrument { get; private set; }
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace NoteLib
         /// Hz the value 0.0 as the lowest note supported. This is
         /// two tones below the 32ft pedal CC of a large organ.
         /// </summary>
-        
+
         public float Pitch { get; private set; }
 
         /// <summary>
@@ -59,14 +56,14 @@ namespace NoteLib
         /// way to use this is to make each unit one beat
         /// of the bar.
         /// </summary>
-        
+
         public float Start { get; private set; }
 
         /// <summary>
         /// The duration of the note before it is silenced.
         /// Uses the same unites as Start.
         /// </summary>
-        
+
         public float Duration { get; private set; }
 
         /// <summary>
@@ -77,7 +74,7 @@ namespace NoteLib
         /// or 48k</param>
         /// <param name="metre">Metronome marking</param>
         /// <returns>The set of samples for this note.</returns>
-        
+
         public IEnumerable<float> Samples(float sampleRate, int metre)
         {
             double samplesPerBeat = sampleRate * 60.0 / metre;
@@ -95,7 +92,7 @@ namespace NoteLib
         /// as the note sound begins, rather than delayed to
         /// the point at which it appears in the score
         /// </summary>
-        
+
         public IEnumerable<float> UnshiftedSamples
             => Instrument.SamplesForPitch(Pitch);
 
@@ -106,7 +103,7 @@ namespace NoteLib
         /// or 48k</param>
         /// <param name="metre">Metronome marking</param>
         /// <returns>The sample number</returns>
-        
+
         public int StartSampleIndex(float sampleRate, int metre)
             => (int)(Start * sampleRate * 60.0 / metre);
 

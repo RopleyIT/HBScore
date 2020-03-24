@@ -1325,7 +1325,7 @@
             "12:8",
             "5:4",
             "7:4"});
-            this.cbTimeSignature.Location = new System.Drawing.Point(9, 502);
+            this.cbTimeSignature.Location = new System.Drawing.Point(9, 481);
             this.cbTimeSignature.Name = "cbTimeSignature";
             this.cbTimeSignature.Size = new System.Drawing.Size(66, 21);
             this.cbTimeSignature.TabIndex = 10;
@@ -1334,7 +1334,7 @@
             // 
             this.chkUseFlats.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkUseFlats.AutoSize = true;
-            this.chkUseFlats.Location = new System.Drawing.Point(9, 462);
+            this.chkUseFlats.Location = new System.Drawing.Point(957, 463);
             this.chkUseFlats.Name = "chkUseFlats";
             this.chkUseFlats.Size = new System.Drawing.Size(67, 17);
             this.chkUseFlats.TabIndex = 11;
@@ -1359,7 +1359,7 @@
             "6",
             "7",
             "8"});
-            this.cbxBeats.Location = new System.Drawing.Point(956, 527);
+            this.cbxBeats.Location = new System.Drawing.Point(956, 528);
             this.cbxBeats.Name = "cbxBeats";
             this.cbxBeats.Size = new System.Drawing.Size(67, 21);
             this.cbxBeats.TabIndex = 12;
@@ -1372,15 +1372,15 @@
             // 
             // label10
             // 
-            this.label10.Location = new System.Drawing.Point(955, 484);
+            this.label10.Location = new System.Drawing.Point(955, 492);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(63, 39);
+            this.label10.Size = new System.Drawing.Size(63, 33);
             this.label10.TabIndex = 13;
-            this.label10.Text = "Selected note duration:";
+            this.label10.Text = "Note duration:";
             // 
             // label11
             // 
-            this.label11.Location = new System.Drawing.Point(12, 484);
+            this.label11.Location = new System.Drawing.Point(12, 463);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(63, 28);
             this.label11.TabIndex = 14;
@@ -1388,7 +1388,7 @@
             // 
             // label12
             // 
-            this.label12.Location = new System.Drawing.Point(13, 530);
+            this.label12.Location = new System.Drawing.Point(13, 510);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(63, 28);
             this.label12.TabIndex = 16;
@@ -1411,7 +1411,7 @@
             "144",
             "156",
             "180"});
-            this.cbMetronome.Location = new System.Drawing.Point(10, 548);
+            this.cbMetronome.Location = new System.Drawing.Point(10, 528);
             this.cbMetronome.Name = "cbMetronome";
             this.cbMetronome.Size = new System.Drawing.Size(66, 21);
             this.cbMetronome.TabIndex = 15;

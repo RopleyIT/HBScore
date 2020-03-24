@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using NoteLib;
 
 namespace HBScore
 {
     public static class Playback
     {
-        const float Overlap = 1;
+        private const float Overlap = 1;
 
         public static List<NoteLib.Note> GenerateNotesFrom(IScore score)
         {
@@ -21,11 +17,11 @@ namespace HBScore
             };
 
             Instrument bells = new Instrument(harmonics, 44100);
-            var notes = new List<NoteLib.Note>();
+            List<NoteLib.Note> notes = new List<NoteLib.Note>();
             int firstBeatOfMeasure = 0;
-            foreach(Measure m in score.Measures)
+            foreach (Measure m in score.Measures)
             {
-                foreach(var note in m.Notes)
+                foreach (INote note in m.Notes)
                 {
                     float pitch = 88 - note.Pitch;
                     float duration = note.Duration / 4.0f + Overlap;

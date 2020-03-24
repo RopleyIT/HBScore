@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PdfSharp;
-using PdfSharp.Pdf;
-using PdfSharp.Drawing;
-using PdfSharp.Drawing.Layout;
-using PdfSharp.Fonts;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 
 namespace HBScore
 {
     public static class PDFScoreWriter
     {
-        public static void GeneratePDF(IEnumerable<Image> images, string outPath, 
+        public static void GeneratePDF(IEnumerable<Image> images, string outPath,
             string title, string composer, string info, string noteList)
         {
             if (images == null || !images.Any())
@@ -28,9 +24,9 @@ namespace HBScore
 
             // Title page
 
-            foreach(Image img in images)
+            foreach (Image img in images)
             {
-                var page = pdfDoc.AddPage();
+                PdfPage page = pdfDoc.AddPage();
                 page.Size = PageSize.A4;
                 page.Orientation = PageOrientation.Landscape;
                 using (MemoryStream ms = new MemoryStream())

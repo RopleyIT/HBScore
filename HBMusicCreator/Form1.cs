@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using HBScore;
-using NAudio;
 using NAudio.Wave;
 using NoteLib;
-using System.Threading;
 
 namespace HBMusicCreator
 {
@@ -49,8 +44,8 @@ namespace HBMusicCreator
         //    "15C", "16B", "17A#", "17A", "18G#", "18G"
         //};
 
-        IScore score = null;
-        bool scoreModified = false;
+        private IScore score = null;
+        private bool scoreModified = false;
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
@@ -73,7 +68,7 @@ namespace HBMusicCreator
         {
             if (UnsavedFileCheck())
             {
-                var sf = new ScoreFactory();
+                ScoreFactory sf = new ScoreFactory();
                 score = sf.CreateScore();
                 score.Measures.Add(sf.CreateMeasure(4, false));
                 SetTimeSignature(score.Measures.First());
@@ -91,7 +86,7 @@ namespace HBMusicCreator
         {
             if (scoreModified)
             {
-                var result = MessageBox.Show
+                DialogResult result = MessageBox.Show
                     (this, "You have unsaved changes. Are you sure you want"
                     + " to discard them?", "Unsaved changes",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -100,9 +95,9 @@ namespace HBMusicCreator
             return true;
         }
 
-        int measureOffset = 0;
+        private int measureOffset = 0;
 
-        IEnumerable<IMeasure> MeasuresFromOffset
+        private IEnumerable<IMeasure> MeasuresFromOffset
         {
             get
             {
@@ -116,15 +111,9 @@ namespace HBMusicCreator
             }
         }
 
-        int BeatsInDisplay
-        {
-            get
-            {
-                return (pbxScore.Width - 4)/ 48;
-            }
-        }
+        private int BeatsInDisplay => (pbxScore.Width - 4) / 48;
 
-        IMeasure MeasureContainingCursor(int offset)
+        private IMeasure MeasureContainingCursor(int offset)
         {
             if (selectedHalfBeat < 0)
                 return null;
@@ -136,7 +125,7 @@ namespace HBMusicCreator
             return null;
         }
 
-        int StartOfMeasureHalfBeat(IMeasure measure)
+        private int StartOfMeasureHalfBeat(IMeasure measure)
         {
             int beats = 0;
             foreach (IMeasure m in score.Measures.Skip(measureOffset))
@@ -158,20 +147,20 @@ namespace HBMusicCreator
             else
                 img = pbxScore.Image;
             using (Graphics g = Graphics.FromImage(img))
-                g.FillRectangle(Brushes.White, 0, 0, 
+                g.FillRectangle(Brushes.White, 0, 0,
                     pbxScore.Width, pbxScore.Height);
             sw.RenderMeasures
-                (img, new Point(2, 18), 48, measureOffset, 
+                (img, new Point(2, 18), 48, measureOffset,
                 score.UseFlats, MeasuresFromOffset, selectedNote);
             pbxScore.Image = img;
             pnlPointer.Invalidate();
         }
 
-        int selectedHalfBeat = -1;
+        private int selectedHalfBeat = -1;
 
         private void PnlPointer_Paint(object sender, PaintEventArgs e)
         {
-            if(selectedHalfBeat >= 0)
+            if (selectedHalfBeat >= 0)
                 using (Graphics g = pnlPointer.CreateGraphics())
                 {
                     Point[] vertices = new Point[]
@@ -192,12 +181,12 @@ namespace HBMusicCreator
             if (currMeasure != null)
             {
                 int noteOffset = 2 * (selectedHalfBeat - StartOfMeasureHalfBeat(currMeasure));
-                var sf = new ScoreFactory();
+                ScoreFactory sf = new ScoreFactory();
                 INote note = currMeasure.Notes.FirstOrDefault
                     (n => n.Offset == noteOffset && n.Pitch == noteNumber);
                 if (note == null)
                 {
-                    var newNote = sf.CreateNote(noteOffset, noteNumber, 4);
+                    INote newNote = sf.CreateNote(noteOffset, noteNumber, 4);
                     (newNote as ColouredNote).ForeColour = noteColour;
                     (newNote as ColouredNote).BackColour = noteBackground;
                     currMeasure.Notes.Add(newNote);
@@ -271,7 +260,7 @@ namespace HBMusicCreator
 
                     // Adjust old style note classes
 
-                    var newMeasures = new List<IMeasure>();
+                    List<IMeasure> newMeasures = new List<IMeasure>();
                     ScoreFactory sf = new ScoreFactory();
 
                     foreach (IMeasure m in score.Measures)
@@ -336,7 +325,7 @@ namespace HBMusicCreator
         private void BeforeCurrentBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             IMeasure m = MeasureContainingCursor(measureOffset);
-            if(m != null)
+            if (m != null)
             {
                 int idx = score.Measures.IndexOf(m);
                 score.Measures.Insert(idx, (new ScoreFactory()).CreateMeasure(BeatsPerBar, Compound));
@@ -361,7 +350,7 @@ namespace HBMusicCreator
             }
         }
 
-        private bool Compound => 
+        private bool Compound =>
             cbTimeSignature.SelectedItem.ToString().EndsWith(":8");
 
         private int BeatsPerBar
@@ -415,15 +404,9 @@ namespace HBMusicCreator
             }
         }
 
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e) => Close();
 
-        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = !UnsavedFileCheck();
-        }
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e) => e.Cancel = !UnsavedFileCheck();
 
         private void PrintToPDFToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -465,7 +448,7 @@ namespace HBMusicCreator
 
         }
 
-        INote selectedNote = null;
+        private INote selectedNote = null;
 
         private void PbxScore_MouseClick(object sender, MouseEventArgs e)
         {
@@ -474,12 +457,12 @@ namespace HBMusicCreator
             ScoreWriter sw = new ScoreWriter(score);
 
             selectedNote = sw.FindNoteFromMouseCoordinates
-                (e.Location, pbxScore.Image, new Point(2, 18), 48, 
+                (e.Location, pbxScore.Image, new Point(2, 18), 48,
                     score.UseFlats, MeasuresFromOffset);
-            if(recolourOnClickToolStripMenuItem.Checked)
+            if (recolourOnClickToolStripMenuItem.Checked)
             {
-                var n = selectedNote as ColouredNote;
-                if(n != null)
+                ColouredNote n = selectedNote as ColouredNote;
+                if (n != null)
                 {
                     n.ForeColour = noteColour;
                     n.BackColour = noteBackground;
@@ -514,14 +497,14 @@ namespace HBMusicCreator
             }
         }
 
-        FrmScoreInfo scoreInfo = new FrmScoreInfo();
+        private readonly FrmScoreInfo scoreInfo = new FrmScoreInfo();
 
         private void ScoreinformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             scoreInfo.Title = score.Title;
             scoreInfo.Composer = score.Composer;
             scoreInfo.Information = score.Information;
-            if(scoreInfo.ShowDialog(this) == DialogResult.OK)
+            if (scoreInfo.ShowDialog(this) == DialogResult.OK)
             {
                 score.Title = scoreInfo.Title;
                 score.Composer = scoreInfo.Composer;
@@ -530,15 +513,12 @@ namespace HBMusicCreator
             }
         }
 
-        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show(this, 
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e) => MessageBox.Show(this,
                 "Grid-based handbell music authoring programme,\r\n"
-                + "Ver. 19.4.28. Licence: free to use, not for\r\n"
+                + "Ver. 20.3.24. Licence: free to use, not for\r\n"
                 + "resale. All enquiries to: sdsmith@ropley.com.\r\n"
-                + "\r\n(c) 2019 S D Smith", "About HBScore", 
+                + "\r\n(c) 2019 S D Smith", "About HBScore",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
 
         private Color noteColour = Color.Black;
         private Color noteBackground = Color.White;
@@ -549,7 +529,7 @@ namespace HBMusicCreator
             if (colorDialog.ShowDialog(this) == DialogResult.OK)
             {
                 noteColour = colorDialog.Color;
-                var note = selectedNote as ColouredNote;
+                ColouredNote note = selectedNote as ColouredNote;
                 if (note != null)
                 {
                     note.ForeColour = noteColour;
@@ -564,7 +544,7 @@ namespace HBMusicCreator
             if (colorDialog.ShowDialog(this) == DialogResult.OK)
             {
                 noteBackground = colorDialog.Color;
-                var note = selectedNote as ColouredNote;
+                ColouredNote note = selectedNote as ColouredNote;
                 if (note != null)
                 {
                     note.BackColour = noteBackground;
@@ -576,10 +556,10 @@ namespace HBMusicCreator
         // TEST & DEBUG EVENTS
         private void playSoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var noteList = Playback.GenerateNotesFrom(score);
+            List<NoteLib.Note> noteList = Playback.GenerateNotesFrom(score);
 
             NoteSampleProvider sampleProvider = new NoteSampleProvider(Metronome, noteList);
-            using (var outputDevice = new WaveOutEvent())
+            using (WaveOutEvent outputDevice = new WaveOutEvent())
             {
                 outputDevice.Init(sampleProvider);
                 outputDevice.Play();

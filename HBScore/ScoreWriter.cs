@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace HBScore
@@ -44,15 +44,15 @@ namespace HBScore
 
         public ScoreWriter(int measures, int beatsPerBar, bool compound, int squares, bool useFlats)
             : this(CreateEmptyScore(measures, beatsPerBar, compound, useFlats), squares)
-        {}
+        { }
 
         private static IScore CreateEmptyScore
             (int measures, int beatsPerBar, bool compound, bool useFlats)
-        { 
-            if(beatsPerBar < 2 || beatsPerBar > 6)
+        {
+            if (beatsPerBar < 2 || beatsPerBar > 6)
                 throw new ArgumentException
                     ("Only support 2 to 6 beats per bar");
-            var score = new Score(useFlats);
+            Score score = new Score(useFlats);
             foreach (int i in Enumerable.Range(0, measures))
                 score.Measures.Add(new Measure(beatsPerBar, compound));
             return score;
@@ -75,24 +75,26 @@ namespace HBScore
             // calculation of how many squares are needed with the fixed value.
 
             if (squares == 0)
-                VerticalSquares = 1 + 
+                VerticalSquares = 1 +
                     (Score.MaxVerticalOffset - Score.MinVerticalOffset - 1) / 3;
             else
                 VerticalSquares = squares;
             ListPages();
-            RenderedPages = new List<Image>(pageBoundaries.Count);
-            RenderedPages.Add(RenderTitlePage());
+            RenderedPages = new List<Image>(pageBoundaries.Count)
+            {
+                RenderTitlePage()
+            };
             for (int i = 0; i < pageBoundaries.Count; i++)
                 RenderedPages.Add(RenderPage(i));
         }
 
         public void SavePDF(string outputPath) =>
-            PDFScoreWriter.GeneratePDF(RenderedPages, outputPath, 
+            PDFScoreWriter.GeneratePDF(RenderedPages, outputPath,
                 Score.Title, Score.Composer, Score.Information, Score.NoteList);
 
-        List<int> pageBoundaries;
-        List<int> systemBoundaries;
-        List<int> barBoundaries;
+        private List<int> pageBoundaries;
+        private List<int> systemBoundaries;
+        private List<int> barBoundaries;
 
         private void ListPages()
         {
@@ -100,7 +102,7 @@ namespace HBScore
             int beats = 0;
             systemBoundaries = new List<int>() { 0 };
             pageBoundaries = new List<int>() { 0 };
-            foreach(Measure m in Score.Measures)
+            foreach (Measure m in Score.Measures)
             {
                 barBoundaries.Add(beats);
                 if (beats + m.BeatsPerBar - systemBoundaries.Last() > MaxBeatsPerSystem)
@@ -136,7 +138,7 @@ namespace HBScore
             g.DrawString(Score.Title, titleFont, Brushes.Black, 1753, 800, sf);
             g.DrawString(Score.Composer, subTitleFont, Brushes.Black, 1753, 960, sf);
             g.DrawString(Score.Information, subTitleFont, Brushes.Black, 1753, 1120, sf);
-            g.DrawString(Score.NoteList, subTitleFont, Brushes.Black, 
+            g.DrawString(Score.NoteList, subTitleFont, Brushes.Black,
                 new RectangleF(300, 1280, 2908, 600), sf);
 
             subTitleFont.Dispose();
@@ -172,7 +174,7 @@ namespace HBScore
 
                 int firstBarOfSystemIdx = IndexOfFirstBarOfSystem(system);
                 int firstBarBeyondSystemIdx = IndexOfFirstBarOfSystem(system + 1);
-                var measures = Score.Measures
+                IEnumerable<IMeasure> measures = Score.Measures
                     .Skip(firstBarOfSystemIdx)
                     .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
                 Point tlhc = new Point(179 - PixelsMargin, 190 - PixelsMargin);
@@ -183,15 +185,15 @@ namespace HBScore
             return bmp;
         }
 
-        public void RenderMeasures(Image img, Point tlhc, int pixelsPerSquare, 
+        public void RenderMeasures(Image img, Point tlhc, int pixelsPerSquare,
             int barNum, bool useFlats, IEnumerable<IMeasure> measures, INote selectedNote)
         {
-            Font barNumFont = new Font("Arial Rounded MT", pixelsPerSquare/6);
-            Pen thickPen = new Pen(Color.Black, pixelsPerSquare/15);
-            Pen thinPen = new Pen(Color.Black, pixelsPerSquare/36);
+            Font barNumFont = new Font("Arial Rounded MT", pixelsPerSquare / 6);
+            Pen thickPen = new Pen(Color.Black, pixelsPerSquare / 15);
+            Pen thinPen = new Pen(Color.Black, pixelsPerSquare / 36);
             Graphics g = Graphics.FromImage(img);
 
-            var beatsInSystem = measures.Sum(m => m.BeatsPerBar);
+            int beatsInSystem = measures.Sum(m => m.BeatsPerBar);
 
             // Draw the border around the whole system
 
@@ -217,7 +219,7 @@ namespace HBScore
                     {
                         g.DrawString((++barNum).ToString(),
                             barNumFont, Brushes.Black, new Point
-                            (upper.X, upper.Y - pixelsPerSquare/4 - 4));
+                            (upper.X, upper.Y - pixelsPerSquare / 4 - 4));
                         if (m != measures.First())
                             g.DrawLine(thickPen, upper, lower);
                     }
@@ -242,9 +244,9 @@ namespace HBScore
             // White out any areas where characters will be written
 
             Point barStart = tlhc;
-            foreach(IMeasure m in measures)
+            foreach (IMeasure m in measures)
             {
-                foreach(INote note in m.Notes)
+                foreach (INote note in m.Notes)
                     InsertBlank(img, note, barStart, useFlats, pixelsPerSquare);
                 barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
             }
@@ -282,7 +284,7 @@ namespace HBScore
                         LineAlignment = StringAlignment.Center
                     };
                     string noteStr = note.ToString(useFlats);
-                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    SizeF size = g.MeasureString(noteStr.Substring(0, 1), font);
                     using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
                     {
                         g.DrawString(noteStr.Substring(0, 1), font, txtBrush, noteCentre, sf);
@@ -316,14 +318,14 @@ namespace HBScore
                         LineAlignment = StringAlignment.Center
                     };
                     string noteStr = note.ToString(useFlats);
-                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    SizeF size = g.MeasureString(noteStr.Substring(0, 1), font);
                     using (Brush fillBrush = new SolidBrush((note as ColouredNote).BackColour))
                     {
                         g.FillRectangle(fillBrush, noteCentre.X - size.Width / 2,
                             noteCentre.Y - size.Height / 2, size.Width, size.Height);
                         if (noteStr.Length > 1)
                         {
-                            var accSize = g.MeasureString(noteStr.Substring(1), accFont);
+                            SizeF accSize = g.MeasureString(noteStr.Substring(1), accFont);
                             g.FillRectangle(fillBrush,
                                 noteCentre.X + size.Width / 2 - accSize.Width / 2,
                                 noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
@@ -366,13 +368,13 @@ namespace HBScore
                         LineAlignment = StringAlignment.Center
                     };
                     string noteStr = note.ToString(useFlats);
-                    var size = g.MeasureString(noteStr.Substring(0, 1), font);
+                    SizeF size = g.MeasureString(noteStr.Substring(0, 1), font);
                     if ((new RectangleF(noteCentre.X - size.Width / 2,
                         noteCentre.Y - size.Height / 2, size.Width, size.Height)).Contains(mousePt))
                         return true;
                     if (noteStr.Length > 1)
                     {
-                        var accSize = g.MeasureString(noteStr.Substring(1), accFont);
+                        SizeF accSize = g.MeasureString(noteStr.Substring(1), accFont);
                         if ((new RectangleF(noteCentre.X + size.Width / 2 - accSize.Width / 2,
                             noteCentre.Y - pixelsPerSquare / 10 - accSize.Height / 2,
                             accSize.Width, accSize.Height)).Contains(mousePt))
@@ -391,7 +393,7 @@ namespace HBScore
             if (!disposedValue)
             {
                 if (disposing)
-                    foreach (var page in RenderedPages)
+                    foreach (Image page in RenderedPages)
                         page.Dispose();
 
                 RenderedPages.Clear();

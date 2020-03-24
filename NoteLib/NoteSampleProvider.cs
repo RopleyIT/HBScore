@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NAudio;
 using NAudio.Wave;
 
 namespace NoteLib
@@ -14,16 +11,15 @@ namespace NoteLib
         /// The metronome marking for the piece. This
         /// defines the length of one beat for each note.
         /// </summary>
-        
+
         public int Metre { get; private set; }
 
         /// <summary>
         /// The set of notes in the piece
         /// </summary>
-        
-        IEnumerable<Note> Notes;
 
-        List<float> samples = new List<float>();
+        private readonly IEnumerable<Note> Notes;
+        private readonly List<float> samples = new List<float>();
 
         public NoteSampleProvider(int metre, IEnumerable<Note> notes)
         {
@@ -44,7 +40,6 @@ namespace NoteLib
 
         private void MergeSamples(Note n)
         {
-            int i = 0;
             int start = n.StartSampleIndex(44100f, Metre);
             int end = n.EndSampleIndex(44100f, Metre);
             if (start > samples.Count)

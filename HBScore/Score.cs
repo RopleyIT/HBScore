@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using System.Drawing;
+using System.Linq;
 
 namespace HBScore
 {
@@ -20,7 +19,7 @@ namespace HBScore
         {
             get
             {
-                var notesPitches = Measures
+                IEnumerable<string> notesPitches = Measures
                     .SelectMany(m => m.Notes)
                     .Select(n => n.Pitch)
                     .Distinct()
@@ -37,7 +36,7 @@ namespace HBScore
         {
             get
             {
-                var notes = Measures.SelectMany(m => m.Notes);
+                IEnumerable<INote> notes = Measures.SelectMany(m => m.Notes);
                 if (notes.Any())
                     return notes.Min(n => n.VerticalOffset(UseFlats));
                 else return 0;
@@ -48,7 +47,7 @@ namespace HBScore
         {
             get
             {
-                var notes = Measures.SelectMany(m => m.Notes);
+                IEnumerable<INote> notes = Measures.SelectMany(m => m.Notes);
                 if (notes.Any())
                     return notes.Max(n => n.VerticalOffset(UseFlats));
                 else return 0;
@@ -120,7 +119,7 @@ namespace HBScore
         }
 
         [NonSerialized]
-        private static string[] sharpStrings =
+        private static readonly string[] sharpStrings =
         {
             "C",
             "B",
@@ -137,7 +136,7 @@ namespace HBScore
         };
 
         [NonSerialized]
-        private static string[] flatStrings =
+        private static readonly string[] flatStrings =
         {
             "C",
             "B",
@@ -160,32 +159,23 @@ namespace HBScore
                 flatStrings[noteIndex] : sharpStrings[noteIndex];
         }
 
-        public string ToString(bool useFlats)
-        {
-            return NoteName(Pitch, useFlats);
-        }
+        public string ToString(bool useFlats) => NoteName(Pitch, useFlats);
 
-        public override string ToString()
-        {
-            return ToString(false);
-        }
+        public override string ToString() => ToString(false);
 
         [NonSerialized]
-        private static int[] sharpOffsets =
+        private static readonly int[] sharpOffsets =
         {
             0, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7
         };
 
         [NonSerialized]
-        private static int[] flatOffsets =
+        private static readonly int[] flatOffsets =
         {
             0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6
         };
 
-        public int VerticalOffset(bool useFlats)
-        {
-            return BellNumber(Pitch, useFlats);
-        }
+        public int VerticalOffset(bool useFlats) => BellNumber(Pitch, useFlats);
 
         public static int BellNumber(int pitch, bool useFlats)
         {

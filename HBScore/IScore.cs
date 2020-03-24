@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace HBScore
 {
@@ -13,7 +11,7 @@ namespace HBScore
         string Composer { get; set; }
         string Information { get; set; }
         string NoteList { get; }
-        
+
         /// <summary>
         /// The collection of bars or measures in the score
         /// </summary>

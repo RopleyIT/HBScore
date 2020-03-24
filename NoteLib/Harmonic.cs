@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoteLib
 {
@@ -13,7 +9,7 @@ namespace NoteLib
         /// the amplitude of the note to which it belongs. 1.0 means
         /// no amplification and no attenuation.
         /// </summary>
-        
+
         public float Amplitude { get; private set; }
 
         /// <summary>
@@ -22,7 +18,7 @@ namespace NoteLib
         /// usual harmonics. For unusual sounds, non-integral
         /// values can also be used.
         /// </summary>
-        
+
         public float Multiplier { get; private set; }
 
         /// <summary>
@@ -32,7 +28,7 @@ namespace NoteLib
         /// special value of zero means it is continuous at
         /// this amplitude rather than instantaneously gone.
         /// </summary>
-        
+
         public float Decay { get; private set; }
 
         public Harmonic(float amplitude, float multiplier, float decay)
@@ -57,7 +53,7 @@ namespace NoteLib
         public float DecayedAmplitude(double t)
         {
             if (Decay == 0)
-                return (float)Amplitude;
+                return Amplitude;
             else
                 return (float)(Amplitude * Math.Exp(-0.3465736 * t / Decay));
         }
