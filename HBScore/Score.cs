@@ -213,25 +213,9 @@ namespace HBScore
             return noteString;
         }
 
-        public virtual Color ForeColour
-        {
-            get
-            {
-                return Color.Black;
-            }
-            set
-            { }
-        }
+        public virtual Color ForeColour { get; set; } = Color.Black;
 
-        public virtual Color BackColour
-        {
-            get
-            {
-                return Color.White;
-            }
-            set
-            { }
-        }
+        public virtual Color BackColour { get; set; } = Color.White;
     }
 
     [Serializable]

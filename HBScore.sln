@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBScore", "HBScore\HBScore.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBScoreTests", "HBScoreTests\HBScoreTests.csproj", "{D23DEB95-963F-46AD-8792-42C6BDC09AD5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteLib", "NoteLib\NoteLib.csproj", "{2224648E-D0C1-465B-B8DF-BF2EEC27BA75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D23DEB95-963F-46AD-8792-42C6BDC09AD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D23DEB95-963F-46AD-8792-42C6BDC09AD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D23DEB95-963F-46AD-8792-42C6BDC09AD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2224648E-D0C1-465B-B8DF-BF2EEC27BA75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2224648E-D0C1-465B-B8DF-BF2EEC27BA75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2224648E-D0C1-465B-B8DF-BF2EEC27BA75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2224648E-D0C1-465B-B8DF-BF2EEC27BA75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

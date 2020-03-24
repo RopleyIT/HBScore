@@ -10,6 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HBScore;
+using NAudio;
+using NAudio.Wave;
+using NoteLib;
+using System.Threading;
 
 namespace HBMusicCreator
 {
@@ -19,7 +23,22 @@ namespace HBMusicCreator
         {
             InitializeComponent();
             cbTimeSignature.SelectedIndex = 4;
+            cbMetronome.SelectedIndex = 3;
             cbxBeats.SelectedIndex = 0;
+        }
+
+        public int Metronome
+        {
+            get
+            {
+                if (cbMetronome.SelectedIndex >= 0 &&
+                    int.TryParse(cbMetronome.SelectedItem.ToString(), out int metronome))
+                {
+                    return metronome;
+                }
+                else
+                    return 72;
+            }
         }
 
         //readonly string[] noteNames =
@@ -550,6 +569,23 @@ namespace HBMusicCreator
                 {
                     note.BackColour = noteBackground;
                     PaintScore();
+                }
+            }
+        }
+
+        // TEST & DEBUG EVENTS
+        private void playSoundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var noteList = Playback.GenerateNotesFrom(score);
+
+            NoteSampleProvider sampleProvider = new NoteSampleProvider(Metronome, noteList);
+            using (var outputDevice = new WaveOutEvent())
+            {
+                outputDevice.Init(sampleProvider);
+                outputDevice.Play();
+                while (outputDevice.PlaybackState == PlaybackState.Playing)
+                {
+                    Thread.Sleep(1000);
                 }
             }
         }
