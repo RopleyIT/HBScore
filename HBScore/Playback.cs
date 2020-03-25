@@ -11,9 +11,9 @@ namespace HBScore
         {
             Harmonic[] harmonics = new Harmonic[]
             {
-                new Harmonic(1.0f, 1.0f, 0.2f),
-                new Harmonic(0.2f, 3.0f, 0.2f),
-                new Harmonic(0.1f, 5.0f, 0.1f)
+                new Harmonic(1.0f, 1.0f, 0.3f),
+                new Harmonic(0.4f, 3.0f, 0.3f),
+                new Harmonic(0.03f, 8f, 0.1f)
             };
 
             Instrument bells = new Instrument(harmonics, 44100);
