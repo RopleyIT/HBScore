@@ -70,6 +70,9 @@ namespace HBScore
     {
         public int BeatsPerBar { get; private set; }
 
+        public int QuarterBeatsPerBar => 
+            CompoundTime ? BeatsPerBar * 6 : BeatsPerBar * 4;
+
         public bool CompoundTime { get; private set; }
 
         public IList<INote> Notes { get; private set; }

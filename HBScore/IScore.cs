@@ -53,6 +53,14 @@ namespace HBScore
         int BeatsPerBar { get; }
 
         /// <summary>
+        /// The number of quarter beats in the bar. Used
+        /// for compound time, where time signatures like
+        /// 9:8 have  nine half beats in a bar
+        /// </summary>
+        
+        int QuarterBeatsPerBar { get; }
+
+        /// <summary>
         /// True if each beat is a compound beat, meaning
         /// it divides into thirds rather than halves
         /// </summary>

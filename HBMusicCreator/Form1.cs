@@ -70,10 +70,10 @@ namespace HBMusicCreator
             {
                 ScoreFactory sf = new ScoreFactory();
                 score = sf.CreateScore();
-                score.Measures.Add(sf.CreateMeasure(4, false));
+                score.Measures.Add(sf.CreateMeasure(BeatsPerBar, Compound));
                 SetTimeSignature(score.Measures.First());
                 measureOffset = 0;
-                selectedHalfBeat = -1;
+                selectedHalfBeat = 0;
                 scoreModified = false;
                 ResetFilePath();
                 PaintScore();
@@ -101,38 +101,38 @@ namespace HBMusicCreator
         {
             get
             {
-                int beats = 0;
+                int quarterBeats = 0;
                 for (int i = measureOffset; i < score.Measures.Count(); i++)
-                    if (beats + score.Measures[i].BeatsPerBar > BeatsInDisplay)
+                    if (quarterBeats + score.Measures[i].QuarterBeatsPerBar > QuarterBeatsInDisplay)
                         return score.Measures.Skip(measureOffset).Take(i);
                     else
-                        beats += score.Measures[i].BeatsPerBar;
+                        quarterBeats += score.Measures[i].QuarterBeatsPerBar;
                 return score.Measures.Skip(measureOffset);
             }
         }
 
-        private int BeatsInDisplay => (pbxScore.Width - 4) / 48;
+        private int QuarterBeatsInDisplay => (pbxScore.Width - 4) / 12;
 
         private IMeasure MeasureContainingCursor(int offset)
         {
             if (selectedHalfBeat < 0)
                 return null;
-            int beats = 0;
+            int quarterBeats = 0;
             foreach (IMeasure m in score.Measures.Skip(offset))
-                if (2 * (beats + m.BeatsPerBar) > selectedHalfBeat)
+                if ((quarterBeats + m.QuarterBeatsPerBar)/2 > selectedHalfBeat)
                     return m;
-                else beats += m.BeatsPerBar;
+                else quarterBeats += m.QuarterBeatsPerBar;
             return null;
         }
 
         private int StartOfMeasureHalfBeat(IMeasure measure)
         {
-            int beats = 0;
+            int quarterBeats = 0;
             foreach (IMeasure m in score.Measures.Skip(measureOffset))
                 if (measure == m)
-                    return beats * 2;
+                    return quarterBeats/2;
                 else
-                    beats += m.BeatsPerBar;
+                    quarterBeats += m.QuarterBeatsPerBar;
             return -1;
         }
 
@@ -330,7 +330,7 @@ namespace HBMusicCreator
                 int idx = score.Measures.IndexOf(m);
                 score.Measures.Insert(idx, (new ScoreFactory()).CreateMeasure(BeatsPerBar, Compound));
                 measureOffset = idx;
-                selectedHalfBeat = 0;
+                selectedHalfBeat = -1;
                 scoreModified = true;
                 PaintScore();
             }
@@ -344,20 +344,24 @@ namespace HBMusicCreator
                 int idx = score.Measures.IndexOf(m);
                 score.Measures.Insert(idx + 1, (new ScoreFactory()).CreateMeasure(BeatsPerBar, Compound));
                 measureOffset = idx;
-                selectedHalfBeat = 2 * m.BeatsPerBar;
+                selectedHalfBeat = m.QuarterBeatsPerBar/2;
                 scoreModified = true;
                 PaintScore();
             }
         }
 
-        private bool Compound =>
-            cbTimeSignature.SelectedItem.ToString().EndsWith(":8");
+        private bool Compound => 
+            cbTimeSignature.SelectedItem != null 
+            ? cbTimeSignature.SelectedItem.ToString().EndsWith(":8") 
+            : false;
 
         private int BeatsPerBar
         {
             get
             {
-                string ts = cbTimeSignature.SelectedItem.ToString();
+                string ts = "4:4";
+                if(cbTimeSignature.SelectedItem != null)
+                    ts = cbTimeSignature.SelectedItem.ToString();
                 if (ts.StartsWith("6"))
                     return 2;
                 if (ts.StartsWith("9"))

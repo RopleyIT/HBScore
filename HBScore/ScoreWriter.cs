@@ -79,7 +79,7 @@ namespace HBScore
                     (Score.MaxVerticalOffset - Score.MinVerticalOffset - 1) / 3;
             else
                 VerticalSquares = squares;
-            ListPages();
+            SetPageSystemAndBarBoundaries();
             RenderedPages = new List<Image>(pageBoundaries.Count)
             {
                 RenderTitlePage()
@@ -92,26 +92,26 @@ namespace HBScore
             PDFScoreWriter.GeneratePDF(RenderedPages, outputPath,
                 Score.Title, Score.Composer, Score.Information, Score.NoteList);
 
-        private List<int> pageBoundaries;
-        private List<int> systemBoundaries;
-        private List<int> barBoundaries;
+        private List<int> pageBoundaries;   // Measured in quarter beats
+        private List<int> systemBoundaries; // Measured in quarter beats
+        private List<int> barBoundaries;    // Measured in quarter beats
 
-        private void ListPages()
+        private void SetPageSystemAndBarBoundaries()
         {
             barBoundaries = new List<int>();
-            int beats = 0;
+            int quarterBeats = 0;
             systemBoundaries = new List<int>() { 0 };
             pageBoundaries = new List<int>() { 0 };
             foreach (Measure m in Score.Measures)
             {
-                barBoundaries.Add(beats);
-                if (beats + m.BeatsPerBar - systemBoundaries.Last() > MaxBeatsPerSystem)
+                barBoundaries.Add(quarterBeats);
+                if (quarterBeats + m.QuarterBeatsPerBar - systemBoundaries.Last() > 4*MaxBeatsPerSystem)
                 {
-                    systemBoundaries.Add(beats);
+                    systemBoundaries.Add(quarterBeats);
                     if (systemBoundaries.Count % SystemsPerPage == 0)
                         pageBoundaries.Add(systemBoundaries.Last());
                 }
-                beats += m.BeatsPerBar;
+                quarterBeats += m.QuarterBeatsPerBar;
             }
         }
 
@@ -194,12 +194,13 @@ namespace HBScore
             Graphics g = Graphics.FromImage(img);
 
             int beatsInSystem = measures.Sum(m => m.BeatsPerBar);
+            int quarterBeatsInSystem = measures.Sum(m => m.QuarterBeatsPerBar);
 
             // Draw the border around the whole system
 
             Size systemSize = new Size
                 (
-                    pixelsPerSquare * beatsInSystem,
+                    (pixelsPerSquare * quarterBeatsInSystem) / 4,
                     pixelsPerSquare * VerticalSquares
                 );
             Rectangle systemBorder = new Rectangle(tlhc, systemSize);
@@ -225,15 +226,16 @@ namespace HBScore
                     }
                     else
                         g.DrawLine(thinPen, upper, lower);
-                    upper.Offset(pixelsPerSquare, 0);
-                    lower.Offset(pixelsPerSquare, 0);
+                    int offset = m.CompoundTime ? 3 * pixelsPerSquare / 2 : pixelsPerSquare;
+                    upper.Offset(offset, 0);
+                    lower.Offset(offset, 0);
                 }
             }
 
             // Draw each horizontal line in the system
 
             Point left = tlhc;
-            Point right = new Point(left.X + beatsInSystem * pixelsPerSquare, left.Y);
+            Point right = new Point(left.X + systemSize.Width, left.Y);
             for (int square = 1; square < VerticalSquares; square++)
             {
                 left.Offset(0, pixelsPerSquare);
@@ -248,7 +250,7 @@ namespace HBScore
             {
                 foreach (INote note in m.Notes)
                     InsertBlank(img, note, barStart, useFlats, pixelsPerSquare);
-                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+                barStart.Offset((m.QuarterBeatsPerBar * pixelsPerSquare) / 4, 0);
             }
 
             // Write the notes to the score
@@ -258,7 +260,7 @@ namespace HBScore
             {
                 foreach (INote note in m.Notes)
                     InsertNote(img, note, barStart, useFlats, pixelsPerSquare, note == selectedNote);
-                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+                barStart.Offset((m.QuarterBeatsPerBar * pixelsPerSquare) / 4, 0);
             }
             g.Dispose();
             barNumFont.Dispose();
@@ -345,7 +347,7 @@ namespace HBScore
                 foreach (INote n in m.Notes)
                     if (NoteHitTest(mousePt, img, n, barStart, useFlats, pixelsPerSquare))
                         return n;
-                barStart.Offset(m.BeatsPerBar * pixelsPerSquare, 0);
+                barStart.Offset((m.QuarterBeatsPerBar * pixelsPerSquare) / 4, 0);
             }
             return null;
         }

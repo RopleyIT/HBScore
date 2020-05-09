@@ -18,17 +18,17 @@ namespace HBScore
 
             Instrument bells = new Instrument(harmonics, 44100);
             List<NoteLib.Note> notes = new List<NoteLib.Note>();
-            int firstBeatOfMeasure = 0;
+            int firstQuarterBeatOfMeasure = 0;
             foreach (Measure m in score.Measures)
             {
                 foreach (INote note in m.Notes)
                 {
                     float pitch = 88 - note.Pitch;
                     float duration = note.Duration / 4.0f + Overlap;
-                    float start = note.Offset / 4.0f + firstBeatOfMeasure;
+                    float start = (note.Offset + firstQuarterBeatOfMeasure)/4.0f;
                     notes.Add(new NoteLib.Note(bells, 0.3f, pitch, start, duration));
                 }
-                firstBeatOfMeasure += m.BeatsPerBar;
+                firstQuarterBeatOfMeasure += m.QuarterBeatsPerBar;
             }
             return notes;
         }
