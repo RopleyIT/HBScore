@@ -352,7 +352,7 @@ namespace HBMusicCreator
 
         private bool Compound => 
             cbTimeSignature.SelectedItem != null 
-            ? cbTimeSignature.SelectedItem.ToString().EndsWith(":8") 
+            ? cbTimeSignature.SelectedItem.ToString().EndsWith(":8")
             : false;
 
         private int BeatsPerBar
@@ -362,13 +362,26 @@ namespace HBMusicCreator
                 string ts = "4:4";
                 if(cbTimeSignature.SelectedItem != null)
                     ts = cbTimeSignature.SelectedItem.ToString();
-                if (ts.StartsWith("6"))
-                    return 2;
-                if (ts.StartsWith("9"))
-                    return 3;
-                if (ts.StartsWith("12"))
-                    return 4;
-                return ts[0] - '0';
+                switch(ts)
+                {
+                    case "2:4": 
+                    case "6:8": 
+                        return 2;
+                    case "3:4":
+                    case "9:8":
+                        return 3;
+                    case "4:4":
+                    case "12:8":
+                        return 4;
+                    case "5:4":
+                        return 5;
+                    case "6:4":
+                        return 6;
+                    case "7:4":
+                        return 7;
+                    default:
+                        return 4;
+                };
             }
         }
 

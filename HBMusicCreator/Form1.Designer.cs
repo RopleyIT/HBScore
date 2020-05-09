@@ -1324,6 +1324,7 @@
             "4:4",
             "12:8",
             "5:4",
+            "6:4",
             "7:4"});
             this.cbTimeSignature.Location = new System.Drawing.Point(9, 481);
             this.cbTimeSignature.Name = "cbTimeSignature";
