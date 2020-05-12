@@ -46,6 +46,8 @@
             this.textColourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.endRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btn20e = new System.Windows.Forms.Button();
@@ -207,6 +209,8 @@
             this.recolourOnClickToolStripMenuItem,
             this.textColourToolStripMenuItem,
             this.textBackgroundToolStripMenuItem,
+            this.startRepeatToolStripMenuItem,
+            this.endRepeatToolStripMenuItem,
             this.playToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
@@ -276,6 +280,20 @@
             this.playToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.playToolStripMenuItem.Text = "Play";
             this.playToolStripMenuItem.Click += new System.EventHandler(this.playSoundToolStripMenuItem_Click);
+            // 
+            // startRepeatToolStripMenuItem
+            // 
+            this.startRepeatToolStripMenuItem.Name = "startRepeatToolStripMenuItem";
+            this.startRepeatToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.startRepeatToolStripMenuItem.Text = "Start repeat";
+            this.startRepeatToolStripMenuItem.Click += new System.EventHandler(this.startRepeatToolStripMenuItem_Click);
+            // 
+            // endRepeatToolStripMenuItem
+            // 
+            this.endRepeatToolStripMenuItem.Name = "endRepeatToolStripMenuItem";
+            this.endRepeatToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.endRepeatToolStripMenuItem.Text = "End repeat";
+            this.endRepeatToolStripMenuItem.Click += new System.EventHandler(this.endRepeatToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -1373,6 +1391,7 @@
             // 
             // label10
             // 
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label10.Location = new System.Drawing.Point(955, 492);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(63, 33);
@@ -1381,6 +1400,7 @@
             // 
             // label11
             // 
+            this.label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label11.Location = new System.Drawing.Point(12, 463);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(63, 28);
@@ -1389,6 +1409,7 @@
             // 
             // label12
             // 
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label12.Location = new System.Drawing.Point(13, 510);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(63, 28);
@@ -1550,6 +1571,8 @@
         private System.Windows.Forms.ToolStripMenuItem playToolStripMenuItem;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ComboBox cbMetronome;
+        private System.Windows.Forms.ToolStripMenuItem startRepeatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem endRepeatToolStripMenuItem;
     }
 }
 

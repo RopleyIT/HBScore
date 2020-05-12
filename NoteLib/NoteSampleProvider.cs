@@ -7,6 +7,8 @@ namespace NoteLib
 {
     public class NoteSampleProvider : ISampleProvider
     {
+        public const float MasterVolume = 0.7071f;
+
         /// <summary>
         /// The metronome marking for the piece. This
         /// defines the length of one beat for each note.
@@ -33,7 +35,7 @@ namespace NoteLib
 
         private void NormaliseAmplitude()
         {
-            float maxAmplitude = samples.Select(s => Math.Abs(s)).Max();
+            float maxAmplitude = samples.Select(s => Math.Abs(s)).Max() * MasterVolume;
             for (int i = 0; i < samples.Count; i++)
                 samples[i] /= maxAmplitude;
         }

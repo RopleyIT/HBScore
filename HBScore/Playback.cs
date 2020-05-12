@@ -19,7 +19,7 @@ namespace HBScore
             Instrument bells = new Instrument(harmonics, 44100);
             List<NoteLib.Note> notes = new List<NoteLib.Note>();
             int firstQuarterBeatOfMeasure = 0;
-            foreach (Measure m in score.Measures)
+            foreach (Measure m in score.MeasuresWithRepeats)
             {
                 foreach (INote note in m.Notes)
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 
@@ -49,9 +50,9 @@ namespace HBScore
         private static IScore CreateEmptyScore
             (int measures, int beatsPerBar, bool compound, bool useFlats)
         {
-            if (beatsPerBar < 2 || beatsPerBar > 6)
+            if (beatsPerBar < 2 || beatsPerBar > 7)
                 throw new ArgumentException
-                    ("Only support 2 to 6 beats per bar");
+                    ("Only support 2 to 7 beats per bar");
             Score score = new Score(useFlats);
             foreach (int i in Enumerable.Range(0, measures))
                 score.Measures.Add(new Measure(beatsPerBar, compound));
@@ -214,6 +215,7 @@ namespace HBScore
 
             foreach (Measure m in measures)
             {
+                int offset = m.CompoundTime ? 3 * pixelsPerSquare / 2 : pixelsPerSquare;
                 for (int beat = 0; beat < m.BeatsPerBar; beat++)
                 {
                     if (beat == 0)
@@ -222,11 +224,15 @@ namespace HBScore
                             barNumFont, Brushes.Black, new Point
                             (upper.X, upper.Y - pixelsPerSquare / 4 - 4));
                         if (m != measures.First())
-                            g.DrawLine(thickPen, upper, lower);
+                        {
+                            if (m.Notes.Any(n => n.Offset == 0 && n.Pitch == Note.DoubleBar))
+                                DrawDoubleBarLine(g, upper, lower, pixelsPerSquare);
+                            else
+                                g.DrawLine(thickPen, upper, lower);
+                        }
                     }
                     else
                         g.DrawLine(thinPen, upper, lower);
-                    int offset = m.CompoundTime ? 3 * pixelsPerSquare / 2 : pixelsPerSquare;
                     upper.Offset(offset, 0);
                     lower.Offset(offset, 0);
                 }
@@ -268,38 +274,85 @@ namespace HBScore
             thickPen.Dispose();
         }
 
+        private void DrawDoubleBarLine(Graphics g, Point upper, Point lower, int pixelsPerSquare)
+        {
+            Pen thinPen = new Pen(Color.Black, pixelsPerSquare / 36);
+            upper.Offset(-(int)(pixelsPerSquare / 30.0), 0);
+            lower.Offset(-(int)(pixelsPerSquare / 30.0), 0);
+            g.DrawLine(thinPen, upper, lower);
+            upper.Offset((int)(pixelsPerSquare / 15.0), 0);
+            lower.Offset((int)(pixelsPerSquare / 15.0), 0);
+            g.DrawLine(thinPen, upper, lower);
+        }
+
         private void InsertNote(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare, bool selected)
         {
             using (Graphics g = Graphics.FromImage(img))
             {
-                // Calculate horizontal position of note
-                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
-                Point noteCentre = barStart;
-                noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
-                    (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
-                using (Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold))
-                using (Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold))
+                if (note.Pitch >= Note.StartRepeat)
+                    RenderSpecial(g, note, barStart, useFlats, pixelsPerSquare, selected);
+                else
                 {
-                    StringFormat sf = new StringFormat
+                    // Calculate horizontal position of note
+                    int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                    Point noteCentre = barStart;
+                    noteCentre.Offset(pixelsIntoBar + pixelsPerSquare / 2,
+                        (note.VerticalOffset(useFlats) - Score.MinVerticalOffset) * pixelsPerSquare / 3);
+                    using (Font font = new Font("Arial Rounded MT", pixelsPerSquare / 3 - 2, FontStyle.Bold))
+                    using (Font accFont = new Font("Arial Rounded MT", pixelsPerSquare / 4, FontStyle.Bold))
                     {
-                        Alignment = StringAlignment.Center,
-                        LineAlignment = StringAlignment.Center
-                    };
-                    string noteStr = note.ToString(useFlats);
-                    SizeF size = g.MeasureString(noteStr.Substring(0, 1), font);
-                    using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
-                    {
-                        g.DrawString(noteStr.Substring(0, 1), font, txtBrush, noteCentre, sf);
-                        if (noteStr.Length > 1)
-                            g.DrawString(noteStr.Substring(1), accFont, txtBrush,
-                                new PointF(noteCentre.X + size.Width / 2, noteCentre.Y - pixelsPerSquare / 10), sf);
-                        if (note.Duration > 4)
-                            using (Pen p = new Pen(txtBrush, pixelsPerSquare / 36.0f))
-                                g.DrawLine(p, noteCentre.X + size.Width, noteCentre.Y - pixelsPerSquare / 10,
-                                    noteCentre.X + pixelsPerSquare * (note.Duration / 4 - 1), noteCentre.Y - pixelsPerSquare / 10);
+                        StringFormat sf = new StringFormat
+                        {
+                            Alignment = StringAlignment.Center,
+                            LineAlignment = StringAlignment.Center
+                        };
+                        string noteStr = note.ToString(useFlats);
+                        SizeF size = g.MeasureString(noteStr.Substring(0, 1), font);
+                        using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
+                        {
+                            g.DrawString(noteStr.Substring(0, 1), font, txtBrush, noteCentre, sf);
+                            if (noteStr.Length > 1)
+                                g.DrawString(noteStr.Substring(1), accFont, txtBrush,
+                                    new PointF(noteCentre.X + size.Width / 2, noteCentre.Y - pixelsPerSquare / 10), sf);
+                            if (note.Duration > 4)
+                                using (Pen p = new Pen(txtBrush, pixelsPerSquare / 36.0f))
+                                    g.DrawLine(p, noteCentre.X + size.Width, noteCentre.Y - pixelsPerSquare / 10,
+                                        noteCentre.X + pixelsPerSquare * (note.Duration / 4 - 1), noteCentre.Y - pixelsPerSquare / 10);
+                        }
                     }
                 }
             }
+        }
+
+        private void RenderSpecial(Graphics g, INote note, Point barStart, bool useFlats, int pixelsPerSquare, bool selected)
+        {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+
+            if (note.Pitch == Note.StartRepeat || note.Pitch == Note.EndRepeat)
+            {
+                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
+                {
+                    RectangleF blob = new RectangleF(
+                        barStart.X + pixelsIntoBar + pixelsPerSquare / 8f,
+                        barStart.Y + pixelsPerSquare / 4f,
+                        pixelsPerSquare / 8f,
+                        pixelsPerSquare / 8f);
+                    if (note.Pitch == Note.EndRepeat)
+                        blob.Offset(5 * pixelsPerSquare / 8f, 0f);
+                    g.FillEllipse(txtBrush, blob);
+                    blob.Offset(0f, 3 * pixelsPerSquare / 8f);
+                    g.FillEllipse(txtBrush, blob);
+                    blob.Offset(0f, pixelsPerSquare * (VerticalSquares - 1));
+                    g.FillEllipse(txtBrush, blob);
+                    blob.Offset(0f, -3 * pixelsPerSquare / 8f);
+                    g.FillEllipse(txtBrush, blob);
+                }
+            }
+
+            // TODO: First and second time bars
         }
 
         private void InsertBlank(Image img, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
@@ -356,6 +409,9 @@ namespace HBScore
         {
             using (Graphics g = Graphics.FromImage(img))
             {
+                if (note.Pitch >= Note.StartRepeat)
+                    return SpecialNoteHitTest(mousePt, g, note, barStart, useFlats, pixelsPerSquare);
+
                 // Calculate horizontal position of note
                 int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
                 Point noteCentre = barStart;
@@ -385,6 +441,29 @@ namespace HBScore
                 }
                 return false;
             }
+        }
+
+        private bool SpecialNoteHitTest(Point mousePt, Graphics g, INote note, Point barStart, bool useFlats, int pixelsPerSquare)
+        {
+            int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+            RectangleF blob = new RectangleF(
+                barStart.X + pixelsIntoBar + pixelsPerSquare / 8f,
+                barStart.Y + pixelsPerSquare / 8f,
+                pixelsPerSquare / 4f,
+                3* pixelsPerSquare / 4f);
+            RectangleF lowerBlob = blob;
+            lowerBlob.Offset(0f, (VerticalSquares - 1) * pixelsPerSquare);
+            if (note.Pitch == Note.StartRepeat && (blob.Contains(mousePt) || lowerBlob.Contains(mousePt)))
+                return true;
+
+            blob.Offset(pixelsPerSquare / 2f, 0f);
+            lowerBlob.Offset(pixelsPerSquare / 2f, 0f);
+            if (note.Pitch == Note.EndRepeat && (blob.Contains(mousePt) || lowerBlob.Contains(mousePt)))
+                return true;
+
+            // TODO: 1st and second time bars
+
+            return false;
         }
 
         #region IDisposable Support

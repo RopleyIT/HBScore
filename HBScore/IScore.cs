@@ -19,6 +19,13 @@ namespace HBScore
         IList<IMeasure> Measures { get; }
 
         /// <summary>
+        /// The collection of measures in the score, as
+        /// played with repeats
+        /// </summary>
+        
+        IList<IMeasure> MeasuresWithRepeats { get; }
+
+        /// <summary>
         /// True if black notes should be represented by
         /// the white note above followed by the flat sign.
         /// False if they should be represented by the
@@ -72,6 +79,20 @@ namespace HBScore
         /// </summary>
 
         IList<INote> Notes { get; }
+
+        /// <summary>
+        /// True if this bar contains a repeat mark at the
+        /// beginning of the bar
+        /// </summary>
+        
+        bool StartsRepeat { get; }
+
+        /// <summary>
+        /// True if this bar contains a repeat mark
+        /// at the end of the bar
+        /// </summary>
+        
+        bool EndsRepeat { get; }
 
     }
 

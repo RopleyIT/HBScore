@@ -174,29 +174,56 @@ namespace HBMusicCreator
         }
 
         private INote lastAddedNote = null;
-        private void Note_Click(object sender, EventArgs e)
+        private void Note_Click(object sender, EventArgs e) 
+            => ClickNote(int.Parse((sender as Button).Tag.ToString()));
+
+        private void startRepeatToolStripMenuItem_Click(object sender, EventArgs e) 
+            => ClickNote(HBScore.Note.StartRepeat);
+
+        private void endRepeatToolStripMenuItem_Click(object sender, EventArgs e) 
+            => ClickNote(HBScore.Note.EndRepeat);
+
+        private void RemoveSpecialNotes(IList<INote> notes, int noteNumber)
         {
-            int noteNumber = int.Parse((sender as Button).Tag.ToString());
+            var deletees = notes.Where(n => n.Pitch == noteNumber).ToList();
+            foreach (var note in deletees)
+                notes.Remove(note);
+        }
+
+        private void ClickNote(int noteNumber)
+        {
             IMeasure currMeasure = MeasureContainingCursor(measureOffset);
             if (currMeasure != null)
             {
-                int noteOffset = 2 * (selectedHalfBeat - StartOfMeasureHalfBeat(currMeasure));
-                ScoreFactory sf = new ScoreFactory();
-                INote note = currMeasure.Notes.FirstOrDefault
-                    (n => n.Offset == noteOffset && n.Pitch == noteNumber);
-                if (note == null)
-                {
-                    INote newNote = sf.CreateNote(noteOffset, noteNumber, 4);
-                    (newNote as ColouredNote).ForeColour = noteColour;
-                    (newNote as ColouredNote).BackColour = noteBackground;
-                    currMeasure.Notes.Add(newNote);
-                    lastAddedNote = note;
-                }
+                // Handle repeat deletion
+
+                if (noteNumber >= HBScore.Note.StartRepeat && currMeasure.Notes.Any(n => n.Pitch == noteNumber))
+                    RemoveSpecialNotes(currMeasure.Notes, noteNumber);
                 else
                 {
-                    currMeasure.Notes.Remove(note);
-                    lastAddedNote = null;
+                    int noteOffset = 2 * (selectedHalfBeat - StartOfMeasureHalfBeat(currMeasure));
+                    ScoreFactory sf = new ScoreFactory();
+                    INote note = currMeasure.Notes.FirstOrDefault
+                        (n => n.Offset == noteOffset && n.Pitch == noteNumber);
+                    if (note == null)
+                    {
+                        if (noteNumber == HBScore.Note.StartRepeat)
+                            noteOffset = 0;
+                        else if (noteNumber == HBScore.Note.EndRepeat)
+                            noteOffset = currMeasure.QuarterBeatsPerBar - 4;
+                        INote newNote = sf.CreateNote(noteOffset, noteNumber, 4);
+                        (newNote as ColouredNote).ForeColour = noteColour;
+                        (newNote as ColouredNote).BackColour = noteBackground;
+                        currMeasure.Notes.Add(newNote);
+                        lastAddedNote = note;
+                    }
+                    else
+                    {
+                        currMeasure.Notes.Remove(note);
+                        lastAddedNote = null;
+                    }
                 }
+                SetSpecialMenuItems(currMeasure);
                 scoreModified = true;
             }
             PaintScore();
@@ -501,8 +528,21 @@ namespace HBMusicCreator
                 SetTimeSignature(currMeasure);
             else
                 SetTimeSignature(score.Measures.First());
+            SetSpecialMenuItems(currMeasure);
             lastAddedNote = null;
             pnlPointer.Invalidate();
+        }
+
+        private void SetSpecialMenuItems(IMeasure currMeasure)
+        {
+            if (currMeasure != null && currMeasure.StartsRepeat)
+                startRepeatToolStripMenuItem.Text = "Delete start repeat";
+            else
+                startRepeatToolStripMenuItem.Text = "Start repeat";
+            if (currMeasure != null && currMeasure.EndsRepeat)
+                endRepeatToolStripMenuItem.Text = "Delete end repeat";
+            else
+                endRepeatToolStripMenuItem.Text = "End repeat";
         }
 
         private void CbxBeats_SelectionChangeCommitted(object sender, EventArgs e)
