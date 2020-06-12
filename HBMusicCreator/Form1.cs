@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using HBScore;
 using NAudio.Wave;
@@ -140,12 +141,20 @@ namespace HBMusicCreator
         {
             ScoreWriter sw = new ScoreWriter(score);
             Image img;
-            if (pbxScore.Image == null
-                || pbxScore.Image.Width != pbxScore.Width
-                || pbxScore.Image.Height != pbxScore.Height)
+            if (pbxScore.Image != null
+                && (pbxScore.Image.Width != pbxScore.Width
+                || pbxScore.Image.Height != pbxScore.Height))
+            {
+                var oldImage = pbxScore.Image;
+                pbxScore.Image = null;
+                oldImage.Dispose();
+            }
+
+            if(pbxScore.Image == null)
                 img = new Bitmap(pbxScore.Width, pbxScore.Height);
             else
                 img = pbxScore.Image;
+
             using (Graphics g = Graphics.FromImage(img))
                 g.FillRectangle(Brushes.White, 0, 0,
                     pbxScore.Width, pbxScore.Height);
@@ -611,7 +620,7 @@ namespace HBMusicCreator
         }
 
         // TEST & DEBUG EVENTS
-        private void playSoundToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void playSoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<NoteLib.Note> noteList = Playback.GenerateNotesFrom(score);
 
@@ -622,7 +631,7 @@ namespace HBMusicCreator
                 outputDevice.Play();
                 while (outputDevice.PlaybackState == PlaybackState.Playing)
                 {
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000).ConfigureAwait(false);
                 }
             }
         }

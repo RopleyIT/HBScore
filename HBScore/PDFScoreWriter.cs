@@ -15,7 +15,7 @@ namespace HBScore
         public static void GeneratePDF(IEnumerable<Image> images, string outPath,
             string title, string composer, string info, string noteList)
         {
-            if (images == null || !images.Any())
+            if (images == null) // || !images.Any())
                 throw new ArgumentException("No images to put in PDF file");
             if (!Directory.Exists(Path.GetDirectoryName(outPath)))
                 throw new ArgumentException("Output folder does not exist");
