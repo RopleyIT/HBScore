@@ -63,6 +63,12 @@
     <Compile Include="FrmScoreInfo.Designer.cs">
       <DependentUpon>FrmScoreInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmTranspose.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTranspose.Designer.cs">
+      <DependentUpon>FrmTranspose.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -70,6 +76,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmScoreInfo.resx">
       <DependentUpon>FrmScoreInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTranspose.resx">
+      <DependentUpon>FrmTranspose.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

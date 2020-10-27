@@ -45,9 +45,9 @@
             this.recolourOnClickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textColourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.endRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btn20e = new System.Windows.Forms.Button();
@@ -126,6 +126,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.cbMetronome = new System.Windows.Forms.ComboBox();
+            this.transposeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMainForm.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbxScore)).BeginInit();
@@ -161,42 +162,42 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.newToolStripMenuItem.Text = "&New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "&Open ...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As ...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.SaveAsToolStripMenuItem_Click);
             // 
             // printToPDFToolStripMenuItem
             // 
             this.printToPDFToolStripMenuItem.Name = "printToPDFToolStripMenuItem";
-            this.printToPDFToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.printToPDFToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.printToPDFToolStripMenuItem.Text = "&Print to PDF ...";
             this.printToPDFToolStripMenuItem.Click += new System.EventHandler(this.PrintToPDFToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -211,6 +212,7 @@
             this.textBackgroundToolStripMenuItem,
             this.startRepeatToolStripMenuItem,
             this.endRepeatToolStripMenuItem,
+            this.transposeToolStripMenuItem,
             this.playToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
@@ -274,13 +276,6 @@
             this.textBackgroundToolStripMenuItem.Text = "Text background ...";
             this.textBackgroundToolStripMenuItem.Click += new System.EventHandler(this.BtnBackColour_Click);
             // 
-            // playToolStripMenuItem
-            // 
-            this.playToolStripMenuItem.Name = "playToolStripMenuItem";
-            this.playToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.playToolStripMenuItem.Text = "Play";
-            this.playToolStripMenuItem.Click += new System.EventHandler(this.playSoundToolStripMenuItem_Click);
-            // 
             // startRepeatToolStripMenuItem
             // 
             this.startRepeatToolStripMenuItem.Name = "startRepeatToolStripMenuItem";
@@ -294,6 +289,13 @@
             this.endRepeatToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.endRepeatToolStripMenuItem.Text = "End repeat";
             this.endRepeatToolStripMenuItem.Click += new System.EventHandler(this.endRepeatToolStripMenuItem_Click);
+            // 
+            // playToolStripMenuItem
+            // 
+            this.playToolStripMenuItem.Name = "playToolStripMenuItem";
+            this.playToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.playToolStripMenuItem.Text = "Play";
+            this.playToolStripMenuItem.Click += new System.EventHandler(this.playSoundToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -1438,6 +1440,13 @@
             this.cbMetronome.Size = new System.Drawing.Size(66, 21);
             this.cbMetronome.TabIndex = 15;
             // 
+            // transposeToolStripMenuItem
+            // 
+            this.transposeToolStripMenuItem.Name = "transposeToolStripMenuItem";
+            this.transposeToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.transposeToolStripMenuItem.Text = "Transpose ...";
+            this.transposeToolStripMenuItem.Click += new System.EventHandler(this.transposeToolStripMenuItem_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1573,6 +1582,7 @@
         private System.Windows.Forms.ComboBox cbMetronome;
         private System.Windows.Forms.ToolStripMenuItem startRepeatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem endRepeatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem transposeToolStripMenuItem;
     }
 }
 

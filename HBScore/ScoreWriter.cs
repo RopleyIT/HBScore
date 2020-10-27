@@ -14,7 +14,7 @@ namespace HBScore
         public const int PixelsPerSquare = 150;
         public const int PixelsPerPageLength = 3508;
         public const int PixelsPerPageHeight = 2480;
-        public const int PixelsMargin = 150;
+        public const int PixelsMargin = 135;
         public const int MaxBeatsPerSystem = 21;
         public int VerticalSquares { get; private set; }
 
@@ -33,6 +33,7 @@ namespace HBScore
                         return 3;
                     case 5:
                     case 6:
+                    case 7:
                         return 2;
                     default:
                         return 1;
@@ -93,8 +94,7 @@ namespace HBScore
         }
 
         public void SavePDF(string outputPath) =>
-            PDFScoreWriter.GeneratePDF(PageImages, outputPath,
-                Score.Title, Score.Composer, Score.Information, Score.NoteList);
+            PDFScoreWriter.GeneratePDF(PageImages, outputPath);
 
         private List<int> pageBoundaries;   // Measured in quarter beats
         private List<int> systemBoundaries; // Measured in quarter beats
@@ -142,7 +142,7 @@ namespace HBScore
 
                 if (bmp == null)
                     bmp = new Bitmap(3508 - 2 * PixelsMargin,
-                        2480 - 2 * PixelsMargin,
+                        2480 - PixelsMargin - 32,
                         PixelFormat.Format32bppArgb);
                 return bmp;
             }
@@ -188,7 +188,7 @@ namespace HBScore
                 IEnumerable<IMeasure> measures = Score.Measures
                     .Skip(firstBarOfSystemIdx)
                     .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
-                Point tlhc = new Point(179 - PixelsMargin, 190 - PixelsMargin);
+                Point tlhc = new Point(164 - PixelsMargin, 175 - PixelsMargin);
                 tlhc.Offset(0, PixelsPerSquare * (VerticalSquares + 1) * (system % SystemsPerPage));
                 RenderMeasures(PageImage, tlhc, PixelsPerSquare, firstBarOfSystemIdx, Score.UseFlats, measures, null);
                 system++;

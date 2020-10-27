@@ -92,6 +92,13 @@ namespace HBScore
             UseFlats = useFlats;
             Measures = new List<IMeasure>();
         }
+
+        public void Transpose(int interval)
+        {
+            foreach (var measure in Measures)
+                foreach (var note in measure.Notes)
+                    note.Pitch += interval;
+        }
     }
 
     /// <summary>
@@ -152,7 +159,7 @@ namespace HBScore
         /// 132 = double bar line section end marker.
         /// </summary>
 
-        public int Pitch { get; private set; }
+        public int Pitch { get; set; }
         public const int StartRepeat = 128;
         public const int EndRepeat = 129;
         public const int FirstTimeSequence = 130;

@@ -581,9 +581,9 @@ namespace HBMusicCreator
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e) => MessageBox.Show(this,
                 "Grid-based handbell music authoring programme,\r\n"
-                + "Ver. 20.3.24. Licence: free to use, not for\r\n"
+                + "Ver. 20.6.19. Licence: free to use, not for\r\n"
                 + "resale. All enquiries to: sdsmith@ropley.com.\r\n"
-                + "\r\n(c) 2019 S D Smith", "About HBScore",
+                + "\r\n(c) 2020 S D Smith", "About HBScore",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         private Color noteColour = Color.Black;
@@ -632,6 +632,19 @@ namespace HBMusicCreator
                 while (outputDevice.PlaybackState == PlaybackState.Playing)
                 {
                     await Task.Delay(1000).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private void transposeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var transpose = new FrmTranspose())
+            {
+                var dlgResult = transpose.ShowDialog(this);
+                if(dlgResult == DialogResult.OK && transpose.Interval != 0)
+                {
+                    score.Transpose(transpose.Interval);
+                    PaintScore();
                 }
             }
         }

@@ -49,6 +49,14 @@ namespace HBScore
         /// </summary>
 
         int MaxVerticalOffset { get; }
+
+        /// <summary>
+        /// Transpose the score up or down by a number of semitones
+        /// </summary>
+        /// <param name="interval">The number of semitones to
+        /// transpose the score by. Positive = up.</param>
+        
+        void Transpose(int interval);
     }
 
     public interface IMeasure
@@ -116,7 +124,7 @@ namespace HBScore
         /// Hence 25 = 15C, and 30 = 18G.
         /// </summary>
 
-        int Pitch { get; }
+        int Pitch { get; set; }
 
         /// <summary>
         /// The length of the note in 1/4 beats

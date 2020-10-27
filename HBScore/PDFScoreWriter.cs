@@ -12,8 +12,7 @@ namespace HBScore
 {
     public static class PDFScoreWriter
     {
-        public static void GeneratePDF(IEnumerable<Image> images, string outPath,
-            string title, string composer, string info, string noteList)
+        public static void GeneratePDF(IEnumerable<Image> images, string outPath)
         {
             if (images == null) // || !images.Any())
                 throw new ArgumentException("No images to put in PDF file");
@@ -38,7 +37,7 @@ namespace HBScore
                         XImage image = XImage.FromStream(ms);
                         double ptWidth = image.PixelWidth * 72 / 300.0;
                         double ptHeight = image.PixelHeight * 72 / 300.0;
-                        gfx.DrawImage(image, 36, 36, ptWidth, ptHeight);
+                        gfx.DrawImage(image, 36, 24, ptWidth, ptHeight);
                     }
                 }
             }
