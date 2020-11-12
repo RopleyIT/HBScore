@@ -16,6 +16,9 @@ namespace HBScore
         public const int PixelsPerPageHeight = 2480;
         public const int PixelsMargin = 135;
         public const int MaxBeatsPerSystem = 21;
+        public const int PixelA4PageWidth = 3508;
+        public const int PixelA4PageHeight = 2480;
+
         public int VerticalSquares { get; private set; }
 
         public int SystemsPerPage
@@ -83,6 +86,47 @@ namespace HBScore
             SetPageSystemAndBarBoundaries();
         }
 
+        /// <summary>
+        /// Height of the painted area in pixels
+        /// </summary>
+        
+        public int ScoreHeightPixels =>
+            PixelsPerSquare * ((VerticalSquares + 1) * SystemsPerPage - 1);
+
+        /// <summary>
+        /// Width in pixels of the painted area of a page
+        /// </summary>
+        /// <param name="page">The page whose width must be measured</param>
+        /// <returns>Width of painted part of the page in pixels</returns>
+        
+        public int ScoreWidthPixelsForPage(int page)
+        {
+            // Walk the set of systems on this page
+
+            int system = page * SystemsPerPage;
+            int maxBeats = 0;
+            while (system < systemBoundaries.Count && system < (page + 1) * SystemsPerPage)
+            {
+                // Find the set of bars in this system
+
+                int firstBarOfSystemIdx = IndexOfFirstBarOfSystem(system);
+                int firstBarBeyondSystemIdx = IndexOfFirstBarOfSystem(system + 1);
+                IEnumerable<IMeasure> measures = Score.Measures
+                    .Skip(firstBarOfSystemIdx)
+                    .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
+                int beats = measures.Select(m => m.BeatsPerBar).Sum();
+                maxBeats = Math.Max(beats, maxBeats);
+                system++;
+            }
+            return maxBeats * PixelsPerSquare;
+        }
+
+        public int ScoreWidthPixels =>
+            Enumerable
+                .Range(1, pageBoundaries.Count)
+                .Select(p => ScoreWidthPixelsForPage(p))
+                .Max();
+
         public IEnumerable<Image> PageImages
         {
             get
@@ -141,8 +185,8 @@ namespace HBScore
                 // more than 1/2 inch.
 
                 if (bmp == null)
-                    bmp = new Bitmap(3508 - 2 * PixelsMargin,
-                        2480 - PixelsMargin - 32,
+                    bmp = new Bitmap(PixelA4PageWidth - 2 * PixelsMargin,
+                        PixelA4PageHeight - PixelsMargin - 32,
                         PixelFormat.Format32bppArgb);
                 return bmp;
             }
@@ -154,16 +198,16 @@ namespace HBScore
             using (Font titleFont = new Font("Arial Rounded MT", 96, FontStyle.Bold))
             using (Font subTitleFont = new Font("Arial Rounded MT", 48, FontStyle.Regular))
             {
-                g.FillRectangle(Brushes.White, 0, 0, 3507, 2480);
+                g.FillRectangle(Brushes.White, 0, 0, PageImage.Width, PageImage.Height);
 
                 StringFormat sf = new StringFormat
                 {
                     Alignment = StringAlignment.Center,
                     LineAlignment = StringAlignment.Center
                 };
-                g.DrawString(Score.Title, titleFont, Brushes.Black, 1753, 800, sf);
-                g.DrawString(Score.Composer, subTitleFont, Brushes.Black, 1753, 960, sf);
-                g.DrawString(Score.Information, subTitleFont, Brushes.Black, 1753, 1120, sf);
+                g.DrawString(Score.Title, titleFont, Brushes.Black, PageImage.Width / 2, 800, sf);
+                g.DrawString(Score.Composer, subTitleFont, Brushes.Black, PageImage.Width / 2, 960, sf);
+                g.DrawString(Score.Information, subTitleFont, Brushes.Black, PageImage.Width / 2, 1120, sf);
                 g.DrawString(Score.NoteList, subTitleFont, Brushes.Black,
                     new RectangleF(300, 1280, 2908, 600), sf);
 
@@ -174,7 +218,7 @@ namespace HBScore
         public Image RenderPage(int page)
         {
             using (Graphics g = Graphics.FromImage(PageImage))
-                g.FillRectangle(Brushes.White, 0, 0, 3507, 2480);
+                g.FillRectangle(Brushes.White, 0, 0, PageImage.Width, PageImage.Height);
 
             // Walk the set of systems on this page
 
@@ -204,6 +248,9 @@ namespace HBScore
             using (Pen thinPen = new Pen(Color.Black, pixelsPerSquare / 36))
             using (Graphics g = Graphics.FromImage(img))
             {
+                // Paint the background white
+
+                // g.FillRectangle(Brushes.White, 0, 0, img.Width, img.Height);
 
                 int beatsInSystem = measures.Sum(m => m.BeatsPerBar);
                 int quarterBeatsInSystem = measures.Sum(m => m.QuarterBeatsPerBar);

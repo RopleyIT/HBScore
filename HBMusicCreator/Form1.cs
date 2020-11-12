@@ -105,7 +105,7 @@ namespace HBMusicCreator
                 int quarterBeats = 0;
                 for (int i = measureOffset; i < score.Measures.Count(); i++)
                     if (quarterBeats + score.Measures[i].QuarterBeatsPerBar > QuarterBeatsInDisplay)
-                        return score.Measures.Skip(measureOffset).Take(i);
+                        return score.Measures.Skip(measureOffset).Take(i - measureOffset);
                     else
                         quarterBeats += score.Measures[i].QuarterBeatsPerBar;
                 return score.Measures.Skip(measureOffset);
@@ -155,9 +155,8 @@ namespace HBMusicCreator
             else
                 img = pbxScore.Image;
 
-            using (Graphics g = Graphics.FromImage(img))
-                g.FillRectangle(Brushes.White, 0, 0,
-                    pbxScore.Width, pbxScore.Height);
+            using (var g = Graphics.FromImage(img))
+                g.FillRectangle(Brushes.White, 0, 0, img.Width, img.Height);
             sw.RenderMeasures
                 (img, new Point(2, 18), 48, measureOffset,
                 score.UseFlats, MeasuresFromOffset, selectedNote);
