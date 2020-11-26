@@ -17,14 +17,13 @@ namespace DisplayScore
     public partial class FrmDisplayScore : Form
     {
         private IScore score = null;
-        private int currPage = 0;
 
         public FrmDisplayScore()
         {
             InitializeComponent();
         }
 
-        BoundedList<Image> pageImages = new BoundedList<Image>();
+        private readonly BoundedList<Image> pageImages = new BoundedList<Image>();
 
         private void FrmDisplayScore_Load(object sender, EventArgs e)
         {
@@ -53,7 +52,6 @@ namespace DisplayScore
 
                 // Adjust old style note classes
 
-                List<IMeasure> newMeasures = new List<IMeasure>();
                 ScoreFactory sf = new ScoreFactory();
 
                 foreach (IMeasure m in score.Measures)
@@ -127,7 +125,7 @@ namespace DisplayScore
                 pbxScore.Image = pageImages.Items[0];
         }
 
-        private void pbxScore_MouseUp(object sender, MouseEventArgs e)
+        private void PbxScore_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.X > pbxScore.Width / 2)
                 pbxScore.Image = pageImages.Next();
@@ -139,13 +137,13 @@ namespace DisplayScore
                 pbxScore.Image = pageImages.Prev();
         }
 
-        private void rewindToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RewindToolStripMenuItem_Click(object sender, EventArgs e)
         {
             pbxScore.Image = pageImages.FirstAfterTitle();
             ctxMenu.Visible = false;
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }

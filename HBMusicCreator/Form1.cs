@@ -618,9 +618,12 @@ namespace HBMusicCreator
             }
         }
 
+        private bool stopRequested = false;
+
         // TEST & DEBUG EVENTS
         private async void playSoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            AllowPlayback(false);
             List<NoteLib.Note> noteList = Playback.GenerateNotesFrom(score);
 
             NoteSampleProvider sampleProvider = new NoteSampleProvider(Metronome, noteList);
@@ -630,9 +633,16 @@ namespace HBMusicCreator
                 outputDevice.Play();
                 while (outputDevice.PlaybackState == PlaybackState.Playing)
                 {
+                    if(stopRequested)
+                    {
+                        outputDevice.Stop();
+                        AllowPlayback(true);
+                        return;
+                    }
                     await Task.Delay(1000).ConfigureAwait(false);
                 }
             }
+            AllowPlayback(true);
         }
 
         private void transposeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -646,6 +656,22 @@ namespace HBMusicCreator
                     PaintScore();
                 }
             }
+        }
+
+        private void stopPlayingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            stopRequested = true;
+        }
+
+        private void AllowPlayback(bool allow)
+        {
+            var f = new Action<bool>(a =>
+            {
+                playToolStripMenuItem.Enabled = a;
+                stopPlayingToolStripMenuItem.Enabled = !a;
+            });
+            Invoke(f, new object[] { allow });
+            stopRequested = false;
         }
     }
 }

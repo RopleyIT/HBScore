@@ -51,7 +51,7 @@
             this.pbxScore.Size = new System.Drawing.Size(400, 234);
             this.pbxScore.TabIndex = 0;
             this.pbxScore.TabStop = false;
-            this.pbxScore.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pbxScore_MouseUp);
+            this.pbxScore.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PbxScore_MouseUp);
             // 
             // ctxMenu
             // 
@@ -67,7 +67,7 @@
             this.rewindToolStripMenuItem.Name = "rewindToolStripMenuItem";
             this.rewindToolStripMenuItem.Size = new System.Drawing.Size(309, 90);
             this.rewindToolStripMenuItem.Text = "&Rewind";
-            this.rewindToolStripMenuItem.Click += new System.EventHandler(this.rewindToolStripMenuItem_Click);
+            this.rewindToolStripMenuItem.Click += new System.EventHandler(this.RewindToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -75,7 +75,7 @@
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(309, 90);
             this.exitToolStripMenuItem.Text = "E&xit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // FrmDisplayScore
             // 
