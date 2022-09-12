@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
+using NoteLib;
 using PdfSharp;
 
 namespace HBScore
@@ -16,6 +17,7 @@ namespace HBScore
         public const int PixelsPerPageHeight = 2480;
         public const int PixelsMargin = 135;
         public const int MaxBeatsPerSystem = 21;
+        public const int MinBeatsPerSystem = 18;
         public const int PixelA4PageWidth = 3508;
         public const int PixelA4PageHeight = 2480;
 
@@ -118,12 +120,13 @@ namespace HBScore
                 maxBeats = Math.Max(beats, maxBeats);
                 system++;
             }
+            maxBeats = Math.Max(MinBeatsPerSystem, maxBeats); // Don't let squares get stupidly big
             return maxBeats * PixelsPerSquare;
         }
 
         public int ScoreWidthPixels =>
             Enumerable
-                .Range(1, pageBoundaries.Count)
+                .Range(0, pageBoundaries.Count)
                 .Select(p => ScoreWidthPixelsForPage(p))
                 .Max();
 
@@ -282,12 +285,7 @@ namespace HBScore
                                 barNumFont, Brushes.Black, new Point
                                 (upper.X, upper.Y - pixelsPerSquare / 4 - 4));
                             if (m != measures.First())
-                            {
-                                if (m.Notes.Any(n => n.Offset == 0 && n.Pitch == Note.DoubleBar))
-                                    DrawDoubleBarLine(g, upper, lower, pixelsPerSquare);
-                                else
-                                    g.DrawLine(thickPen, upper, lower);
-                            }
+                                g.DrawLine(thickPen, upper, lower);
                         }
                         else
                             g.DrawLine(thinPen, upper, lower);
@@ -307,9 +305,19 @@ namespace HBScore
                     g.DrawLine(thinPen, left, right);
                 }
 
+                // Write out any special notes (repeats, double bars etc)
+                
+                Point barStart = tlhc;
+                foreach (IMeasure m in measures)
+                {
+                    foreach (INote note in m.Notes.Where(n => n.Pitch >= Note.StartRepeat))
+                        InsertNote(g, note, barStart, useFlats, pixelsPerSquare, note == selectedNote);
+                    barStart.Offset((m.QuarterBeatsPerBar * pixelsPerSquare) / 4, 0);
+                }
+
                 // White out any areas where characters will be written
 
-                Point barStart = tlhc;
+                barStart = tlhc;
                 foreach (IMeasure m in measures)
                 {
                     foreach (INote note in m.Notes)
@@ -322,22 +330,31 @@ namespace HBScore
                 barStart = tlhc;
                 foreach (IMeasure m in measures)
                 {
-                    foreach (INote note in m.Notes)
+                    foreach (INote note in m.Notes.Where(n => n.Pitch < Note.StartRepeat))
                         InsertNote(g, note, barStart, useFlats, pixelsPerSquare, note == selectedNote);
                     barStart.Offset((m.QuarterBeatsPerBar * pixelsPerSquare) / 4, 0);
                 }
             }
         }
 
-        private void DrawDoubleBarLine(Graphics g, Point upper, Point lower, int pixelsPerSquare)
+        private void DrawDoubleBarLine(Graphics g, Point upper, Point lower, int pixelsPerSquare, bool selected)
         {
-            Pen thinPen = new Pen(Color.Black, pixelsPerSquare / 36);
-            upper.Offset(-(int)(pixelsPerSquare / 30.0), 0);
-            lower.Offset(-(int)(pixelsPerSquare / 30.0), 0);
-            g.DrawLine(thinPen, upper, lower);
-            upper.Offset((int)(pixelsPerSquare / 15.0), 0);
-            lower.Offset((int)(pixelsPerSquare / 15.0), 0);
-            g.DrawLine(thinPen, upper, lower);
+            using (Brush brush = new SolidBrush(Color.White))
+            using (Pen thinPen = new Pen(selected ? Color.Red : Color.Black, pixelsPerSquare / 36))
+            using (Pen thickPen = new Pen(Color.Black, pixelsPerSquare/15))
+            {
+                int lineOff = pixelsPerSquare / 24;
+                Rectangle dBar = new Rectangle(
+                    upper.X - lineOff, 
+                    upper.Y, 
+                    lineOff * 2, 
+                    lower.Y - upper.Y);
+                g.FillRectangle(brush, dBar);
+                g.DrawLine(thinPen, dBar.Left, dBar.Top, dBar.Left, dBar.Bottom);
+                g.DrawLine(thinPen, dBar.Right, dBar.Top, dBar.Right, dBar.Bottom);
+                g.DrawLine(thickPen, dBar.Left, dBar.Top, dBar.Right, dBar.Top);
+                g.DrawLine(thickPen, dBar.Left, dBar.Bottom, dBar.Right, dBar.Bottom);
+            }
         }
 
         private void InsertNote(Graphics g, INote note, Point barStart, bool useFlats, int pixelsPerSquare, bool selected)
@@ -382,9 +399,16 @@ namespace HBScore
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
 
+            int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
             if (note.Pitch == Note.StartRepeat || note.Pitch == Note.EndRepeat)
             {
-                int pixelsIntoBar = note.Offset * pixelsPerSquare / 4;
+                int dblBarX = barStart.X + pixelsIntoBar;
+                if (note.Pitch == Note.EndRepeat)
+                    dblBarX += pixelsPerSquare;
+                DrawDoubleBarLine(g, new Point(dblBarX, barStart.Y), 
+                    new Point(dblBarX, barStart.Y + VerticalSquares * pixelsPerSquare), 
+                        pixelsPerSquare, selected);
+
                 using (Brush txtBrush = selected ? new SolidBrush(Color.Red) : new SolidBrush((note as ColouredNote).ForeColour))
                 {
                     RectangleF blob = new RectangleF(
@@ -403,7 +427,17 @@ namespace HBScore
                     g.FillEllipse(txtBrush, blob);
                 }
             }
+            else if(note.Pitch == Note.DoubleBar)
+            {
+                // Draw the double bar line after the selected beat
 
+                Point top = new Point
+                    (barStart.X + pixelsIntoBar + pixelsPerSquare, barStart.Y);
+                Point bottom = new Point
+                    (barStart.X + pixelsIntoBar + pixelsPerSquare, 
+                    barStart.Y + VerticalSquares * pixelsPerSquare);
+                DrawDoubleBarLine(g, top, bottom, pixelsPerSquare, selected);
+            }
             // TODO: First and second time bars
         }
 

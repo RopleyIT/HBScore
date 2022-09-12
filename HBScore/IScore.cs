@@ -102,6 +102,12 @@ namespace HBScore
         
         bool EndsRepeat { get; }
 
+        /// <summary>
+        /// True if any note in this bar is 
+        /// followed by a double bar line
+        /// </summary>
+        
+        bool HasDoubleBarLine { get; }
     }
 
     public interface INote

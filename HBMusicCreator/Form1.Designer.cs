@@ -49,6 +49,8 @@
             this.endRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transposeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopPlayingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyBarsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btn20e = new System.Windows.Forms.Button();
@@ -127,7 +129,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.cbMetronome = new System.Windows.Forms.ComboBox();
-            this.stopPlayingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.doubleBarlineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMainForm.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbxScore)).BeginInit();
@@ -213,9 +215,11 @@
             this.textBackgroundToolStripMenuItem,
             this.startRepeatToolStripMenuItem,
             this.endRepeatToolStripMenuItem,
+            this.doubleBarlineToolStripMenuItem,
             this.transposeToolStripMenuItem,
             this.playToolStripMenuItem,
-            this.stopPlayingToolStripMenuItem});
+            this.stopPlayingToolStripMenuItem,
+            this.copyBarsToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
             this.editToolStripMenuItem.Text = "&Edit";
@@ -305,6 +309,21 @@
             this.playToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.playToolStripMenuItem.Text = "Play";
             this.playToolStripMenuItem.Click += new System.EventHandler(this.playSoundToolStripMenuItem_Click);
+            // 
+            // stopPlayingToolStripMenuItem
+            // 
+            this.stopPlayingToolStripMenuItem.Enabled = false;
+            this.stopPlayingToolStripMenuItem.Name = "stopPlayingToolStripMenuItem";
+            this.stopPlayingToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.stopPlayingToolStripMenuItem.Text = "Stop playing";
+            this.stopPlayingToolStripMenuItem.Click += new System.EventHandler(this.stopPlayingToolStripMenuItem_Click);
+            // 
+            // copyBarsToolStripMenuItem
+            // 
+            this.copyBarsToolStripMenuItem.Name = "copyBarsToolStripMenuItem";
+            this.copyBarsToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.copyBarsToolStripMenuItem.Text = "Copy bars ...";
+            this.copyBarsToolStripMenuItem.Click += new System.EventHandler(this.copyBarsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -1449,13 +1468,12 @@
             this.cbMetronome.Size = new System.Drawing.Size(66, 21);
             this.cbMetronome.TabIndex = 15;
             // 
-            // stopPlayingToolStripMenuItem
+            // doubleBarlineToolStripMenuItem
             // 
-            this.stopPlayingToolStripMenuItem.Enabled = false;
-            this.stopPlayingToolStripMenuItem.Name = "stopPlayingToolStripMenuItem";
-            this.stopPlayingToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.stopPlayingToolStripMenuItem.Text = "Stop playing";
-            this.stopPlayingToolStripMenuItem.Click += new System.EventHandler(this.stopPlayingToolStripMenuItem_Click);
+            this.doubleBarlineToolStripMenuItem.Name = "doubleBarlineToolStripMenuItem";
+            this.doubleBarlineToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.doubleBarlineToolStripMenuItem.Text = "Double barline";
+            this.doubleBarlineToolStripMenuItem.Click += new System.EventHandler(this.doubleBarlineToolStripMenuItem_Click);
             // 
             // FrmMain
             // 
@@ -1594,6 +1612,8 @@
         private System.Windows.Forms.ToolStripMenuItem endRepeatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transposeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopPlayingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyBarsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem doubleBarlineToolStripMenuItem;
     }
 }
 

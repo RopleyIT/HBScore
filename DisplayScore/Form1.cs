@@ -53,16 +53,11 @@ namespace DisplayScore
                 // Adjust old style note classes
 
                 ScoreFactory sf = new ScoreFactory();
-
                 foreach (IMeasure m in score.Measures)
-                {
                     for (int i = 0; i < m.Notes.Count(); i++)
-                    {
                         if (!(m.Notes[i] is ColouredNote))
                             m.Notes[i] = sf.CreateNote
                                 (m.Notes[i].Offset, m.Notes[i].Pitch, m.Notes[i].Duration);
-                    }
-                }
                 filePath = ofdScoreFile.FileName;
                 Properties.Settings.Default.FilePath = filePath;
                 Properties.Settings.Default.Save();
@@ -127,9 +122,9 @@ namespace DisplayScore
 
         private void PbxScore_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.X > pbxScore.Width / 2)
+            if (e.X > pbxScore.Width / 4)
                 pbxScore.Image = pageImages.Next();
-            else if(e.X < pbxScore.Width/8 && e.Y < pbxScore.Height/6)
+            else if(e.Y < pbxScore.Height/6)
             {
                 ctxMenu.Visible = true;
             }

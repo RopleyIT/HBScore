@@ -57,6 +57,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmBarCopy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBarCopy.Designer.cs">
+      <DependentUpon>FrmBarCopy.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmScoreInfo.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,6 +79,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBarCopy.resx">
+      <DependentUpon>FrmBarCopy.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmScoreInfo.resx">
       <DependentUpon>FrmScoreInfo.cs</DependentUpon>

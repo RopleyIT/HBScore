@@ -32,6 +32,25 @@ namespace HBScore
 
         public IList<IMeasure> Measures { get; private set; }
 
+        public IList<IMeasure> CloneMeasures(int index, int count)
+        {
+            int oldCount = Measures.Count;
+            if (index < 0 || index >= oldCount
+                || (index + count) < 0 || (index + count) > oldCount)
+                return new List<IMeasure>();
+            IEnumerable<IMeasure> range = Measures.Skip(index).Take(count);
+            return new List<IMeasure>(range.Select(m => (m as Measure).Clone()));
+        }
+
+        public void InsertMeasures(int index, IList<IMeasure> insertees)
+        {
+            if(index >= 0 || index <= Measures.Count)
+            {
+                foreach (var m in insertees.Reverse())
+                    Measures.Insert(index, m);
+            }
+        }
+
         public IList<IMeasure> MeasuresWithRepeats
         {
             get
@@ -97,7 +116,9 @@ namespace HBScore
         {
             foreach (var measure in Measures)
                 foreach (var note in measure.Notes)
-                    note.Pitch += interval;
+                    if(note.Pitch + interval < Note.StartRepeat 
+                        && note.Pitch + interval > 0)
+                        note.Pitch += interval;
         }
     }
 
@@ -124,11 +145,25 @@ namespace HBScore
             Notes = new List<INote>();
         }
 
+        public Measure Clone()
+        {
+            var clone = new Measure(BeatsPerBar, CompoundTime);
+            foreach (var n in Notes)
+                if (n is ColouredNote)
+                    clone.Notes.Add((n as ColouredNote).Clone());
+                else
+                    clone.Notes.Add((n as Note).Clone());
+            return clone;
+        }
+
         public bool StartsRepeat
             => Notes.Any(n => n.Pitch == Note.StartRepeat);
 
         public bool EndsRepeat
             => Notes.Any(n => n.Pitch == Note.EndRepeat);
+
+        public bool HasDoubleBarLine
+            => Notes.Any(n => n.Pitch == Note.DoubleBar);
     }
 
     [Serializable]
@@ -178,6 +213,13 @@ namespace HBScore
             Pitch = pitch;
             Duration = duration;
         }
+
+        /// <summary>
+        /// Create a deep copy of the note
+        /// </summary>
+        /// <returns>A duplicate of the note</returns>
+        
+        public virtual INote Clone() => new Note(Offset, Pitch, Duration);
 
         [NonSerialized]
         private static readonly string[] sharpStrings =
@@ -290,6 +332,16 @@ namespace HBScore
         {
             ForeColour = Color.Black;
             BackColour = Color.White;
+        }
+
+        public override INote Clone()
+        {
+            var clone = new ColouredNote(Offset, Pitch, Duration)
+            {
+                ForeColour = ForeColour,
+                BackColour = BackColour
+            };
+            return clone;
         }
 
         public override Color ForeColour

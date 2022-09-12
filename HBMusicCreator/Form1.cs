@@ -191,6 +191,9 @@ namespace HBMusicCreator
         private void endRepeatToolStripMenuItem_Click(object sender, EventArgs e) 
             => ClickNote(HBScore.Note.EndRepeat);
 
+        private void doubleBarlineToolStripMenuItem_Click(object sender, EventArgs e)
+            => ClickNote(HBScore.Note.DoubleBar);
+
         private void RemoveSpecialNotes(IList<INote> notes, int noteNumber)
         {
             var deletees = notes.Where(n => n.Pitch == noteNumber).ToList();
@@ -219,11 +222,16 @@ namespace HBMusicCreator
                             noteOffset = 0;
                         else if (noteNumber == HBScore.Note.EndRepeat)
                             noteOffset = currMeasure.QuarterBeatsPerBar - 4;
+                        else if (noteNumber == HBScore.Note.DoubleBar)
+                            if ((noteOffset & 2) != 0)
+                                noteOffset -= 2; // Place double bar after current note
                         INote newNote = sf.CreateNote(noteOffset, noteNumber, 4);
                         (newNote as ColouredNote).ForeColour = noteColour;
                         (newNote as ColouredNote).BackColour = noteBackground;
                         currMeasure.Notes.Add(newNote);
                         lastAddedNote = note;
+                        selectedNote = newNote;
+                        cbxBeats.SelectedIndex = selectedNote.Duration / 4 - 1;
                     }
                     else
                     {
@@ -551,6 +559,10 @@ namespace HBMusicCreator
                 endRepeatToolStripMenuItem.Text = "Delete end repeat";
             else
                 endRepeatToolStripMenuItem.Text = "End repeat";
+            if (currMeasure != null && currMeasure.HasDoubleBarLine)
+                doubleBarlineToolStripMenuItem.Text = "Delete double bar line";
+            else
+                doubleBarlineToolStripMenuItem.Text = "Double bar line";
         }
 
         private void CbxBeats_SelectionChangeCommitted(object sender, EventArgs e)
@@ -672,6 +684,20 @@ namespace HBMusicCreator
             });
             Invoke(f, new object[] { allow });
             stopRequested = false;
+        }
+
+        private void copyBarsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmBarCopy frmCopy = new FrmBarCopy(score.Measures.Count);
+            if (frmCopy.ShowDialog() == DialogResult.OK)
+            {
+                var copiedMeasures = (score as Score).CloneMeasures(frmCopy.First, frmCopy.Count);
+                if (copiedMeasures != null && copiedMeasures.Count > 0)
+                {
+                    (score as Score).InsertMeasures(frmCopy.InsertionPoint, copiedMeasures);
+                    PaintScore();
+                }
+            }
         }
     }
 }
