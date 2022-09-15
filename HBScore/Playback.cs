@@ -13,13 +13,16 @@ namespace HBScore
             {
                 new Harmonic(1.0f, 1.0f, 0.3f),
                 new Harmonic(0.4f, 3.0f, 0.3f),
-                new Harmonic(0.03f, 8f, 0.1f)
+                new Harmonic(0.2f, 5.0f, 0.3f),
+                new Harmonic(0.15f, 6.0f, 0.3f),
+                new Harmonic(0.15f, 8.0f, 0.3f)
             };
 
             Instrument bells = new Instrument(harmonics, 44100);
             List<NoteLib.Note> notes = new List<NoteLib.Note>();
             int firstQuarterBeatOfMeasure = 0;
-            foreach (Measure m in score.MeasuresWithRepeats)
+            IList<IMeasure> expandedMeasures = score.MeasuresWithRepeats;
+            foreach (IMeasure m in expandedMeasures)
             {
                 foreach (INote note in m.Notes)
                 {

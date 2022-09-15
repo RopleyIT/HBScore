@@ -49,7 +49,7 @@ namespace HBScore
         public IScore Score { get; set; }
 
         public ScoreWriter(int measures, int beatsPerBar, bool compound, int squares, bool useFlats)
-            : this(CreateEmptyScore(measures, beatsPerBar, compound, useFlats), squares)
+            : this(CreateEmptyScore(measures, beatsPerBar, compound, useFlats), false, squares)
         { }
 
         private static IScore CreateEmptyScore
@@ -64,13 +64,21 @@ namespace HBScore
             return score;
         }
 
-        public ScoreWriter(IScore score, int squares = 0)
+        private bool expandRepeats;
+        private IList<IMeasure> scoreMeasures;
+
+        public ScoreWriter(IScore score, bool expand = false, int squares = 0)
         {
             if (score == null)
                 throw new ArgumentException("No score passed to score writer");
             if (!score.Measures.Any())
                 throw new ArgumentException("Score has no bars");
             Score = score;
+            expandRepeats = expand;
+            if (expand)
+                scoreMeasures = Score.MeasuresWithRepeats;
+            else
+                scoreMeasures = Score.Measures;
 
             // Calculate how many vertical squares are needed to represent
             // the notes used. It is permitted to use the line above and
@@ -113,7 +121,7 @@ namespace HBScore
 
                 int firstBarOfSystemIdx = IndexOfFirstBarOfSystem(system);
                 int firstBarBeyondSystemIdx = IndexOfFirstBarOfSystem(system + 1);
-                IEnumerable<IMeasure> measures = Score.Measures
+                IEnumerable<IMeasure> measures = scoreMeasures
                     .Skip(firstBarOfSystemIdx)
                     .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
                 int beats = measures.Select(m => m.BeatsPerBar).Sum();
@@ -153,7 +161,7 @@ namespace HBScore
             int quarterBeats = 0;
             systemBoundaries = new List<int>() { 0 };
             pageBoundaries = new List<int>() { 0 };
-            foreach (Measure m in Score.Measures)
+            foreach (Measure m in scoreMeasures)
             {
                 barBoundaries.Add(quarterBeats);
                 if (quarterBeats + m.QuarterBeatsPerBar - systemBoundaries.Last() > 4*MaxBeatsPerSystem)
@@ -232,7 +240,7 @@ namespace HBScore
 
                 int firstBarOfSystemIdx = IndexOfFirstBarOfSystem(system);
                 int firstBarBeyondSystemIdx = IndexOfFirstBarOfSystem(system + 1);
-                IEnumerable<IMeasure> measures = Score.Measures
+                IEnumerable<IMeasure> measures = scoreMeasures
                     .Skip(firstBarOfSystemIdx)
                     .Take(firstBarBeyondSystemIdx - firstBarOfSystemIdx);
                 Point tlhc = new Point(164 - PixelsMargin, 175 - PixelsMargin);

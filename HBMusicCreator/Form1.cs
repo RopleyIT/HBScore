@@ -218,13 +218,16 @@ namespace HBMusicCreator
                         (n => n.Offset == noteOffset && n.Pitch == noteNumber);
                     if (note == null)
                     {
-                        if (noteNumber == HBScore.Note.StartRepeat)
-                            noteOffset = 0;
-                        else if (noteNumber == HBScore.Note.EndRepeat)
-                            noteOffset = currMeasure.QuarterBeatsPerBar - 4;
-                        else if (noteNumber == HBScore.Note.DoubleBar)
-                            if ((noteOffset & 2) != 0)
-                                noteOffset -= 2; // Place double bar after current note
+                        if (noteNumber == HBScore.Note.StartRepeat
+                            || noteNumber == HBScore.Note.EndRepeat
+                            || noteNumber == HBScore.Note.DoubleBar)
+                        {
+                            // Place start repeat before current note,
+                            // but place end repeat or double bar after
+                            // the selected note
+
+                            noteOffset = (currMeasure as Measure).StartOfBeat(noteOffset);
+                        }
                         INote newNote = sf.CreateNote(noteOffset, noteNumber, 4);
                         (newNote as ColouredNote).ForeColour = noteColour;
                         (newNote as ColouredNote).BackColour = noteBackground;

@@ -51,29 +51,245 @@ namespace HBScore
             }
         }
 
+        private int EndRepeatOffset(IMeasure bar)
+            => (from n in bar.Notes
+                where n.Pitch == Note.EndRepeat
+                select n.Offset).First();
+        
+        private IEnumerable<INote> NotesBeforeEndRepeat(IMeasure bar)
+        {
+            var repeatOffset = EndRepeatOffset(bar) 
+                + (bar.CompoundTime ? 6 : 4);
+
+            return
+                from n in bar.Notes
+                where n.Pitch < Note.StartRepeat
+                && n.Offset < repeatOffset
+                orderby n.Offset
+                select n;
+        }
+
+        private int StartRepeatOffset(IMeasure bar)
+            => (from n in bar.Notes
+                 where n.Pitch == Note.StartRepeat
+                 select n.Offset).First();
+
+        private IEnumerable<INote> NotesAfterStartRepeat(IMeasure bar)
+        {
+            var repeatOffset = StartRepeatOffset(bar);
+
+            return
+                from n in bar.Notes
+                where n.Pitch < Note.StartRepeat
+                && n.Offset >= repeatOffset
+                orderby n.Offset
+                select n;
+        }
+
+        /// <summary>
+        /// Create the hybrid bar that is made from
+        /// the half bars at each end of a repeat
+        /// </summary>
+        /// <param name="earlier">The bar at the beginning of a repeat</param>
+        /// <param name="later">The bar at the end of a repeat</param>
+        /// <returns>The new bar</returns>
+        
+        private IEnumerable<IMeasure> CreateRepeatBars(IMeasure earlier, IMeasure later)
+        {
+            // Validation
+
+            if (earlier == null || later == null
+                || earlier.CompoundTime != later.CompoundTime)
+                yield break;
+            if (!earlier.Notes.Any(n => n.Pitch == Note.StartRepeat)
+                || !later.Notes.Any(n => n.Pitch == Note.EndRepeat))
+                yield break;
+
+            // Filters
+
+            int startOffset = StartRepeatOffset(earlier);
+            int endOffset = EndRepeatOffset(later);
+            int sqPerBeat = earlier.CompoundTime ? 6 : 4;
+
+            if (endOffset == later.QuarterBeatsPerBar - sqPerBeat)
+            {
+                yield return later;
+
+                // Earlier bar has repeat mark at beginning, later
+                // bar has repeat mark at the end. Just return
+                // the two bars unaltered.
+
+                if (startOffset == 0)
+                    yield return earlier;
+
+                // Earlier bar has repeat mark part way through.
+                // Return the later bar followed by a truncated
+                // second half of the earlier bar.
+
+                else
+                {
+                    var measure = (new ScoreFactory())
+                        .CreateMeasure(earlier.BeatsPerBar - startOffset / sqPerBeat,
+                        earlier.CompoundTime);
+                    foreach (INote note in NotesAfterStartRepeat(earlier))
+                        measure.Notes.Add(note.Clone());
+                    yield return measure;
+                }
+            }
+            else
+            {
+
+                // Later bar has repeat mark half way through.
+                // Return a truncated first half of the later bar
+                // followed by all of the earlier bar.
+
+                if (startOffset == 0)
+                {
+                    var measure = (new ScoreFactory())
+                        .CreateMeasure(1 + endOffset / sqPerBeat, later.CompoundTime);
+                    foreach (INote note in NotesBeforeEndRepeat(later))
+                        measure.Notes.Add(note.Clone());
+                    yield return measure;
+                    yield return earlier;
+                }
+
+                // Both the later and earlier bars have repeat marks
+                // other than on the barlines. Create a single new
+                // bar that accumulates the beats from the two half
+                // bars between the repeat signs.
+
+                else
+                {
+                    int repeatBarBeats = 1 +
+                        (earlier.QuarterBeatsPerBar - startOffset + endOffset) / sqPerBeat;
+                    var measure = (new ScoreFactory())
+                        .CreateMeasure(repeatBarBeats, earlier.CompoundTime);
+                    foreach (INote note in NotesBeforeEndRepeat(later))
+                        measure.Notes.Add(note.Clone());
+                    foreach (INote note in NotesAfterStartRepeat(earlier))
+                        measure.Notes.Add(note.Clone());
+                    yield return measure;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the bar numbers of the sequence of start repeat
+        /// and end repeat markers. Note this handles markers in
+        /// the same bar, which could be either way round.
+        /// The returned values are the bar numbers of the start
+        /// repeats interleaved with the one's complement bar
+        /// numbers of the end repeats.
+        /// </summary>
+        
+        private IEnumerable<int> NextRepeatMark
+        {
+            get
+            {
+                foreach (int i in Enumerable.Range(0, Measures.Count))
+                    foreach (INote note in Measures[i].Notes.OrderBy(n => n.Offset))
+                        if (note.Pitch == Note.StartRepeat)
+                            yield return i;
+                        else if (note.Pitch == Note.EndRepeat)
+                            yield return ~i;
+            }
+        }
+
+        private List<int> repeatMarks = null; 
+
+        /// <summary>
+        /// Given a repeat marker, find the next repeat marker
+        /// in the whole score. Allows for one of each repeat
+        /// marker within the same bar, either way round.
+        /// </summary>
+        /// <param name="prevRepeat"></param>
+        /// <returns>The value of the next repeat marker,
+        /// or null if no more markers, or if the prevRepeat
+        /// argument was not a valid repeat marker</returns>
+        
+        private int? NextRepeat(int prevRepeat)
+        {
+            int prevIdx = repeatMarks.IndexOf(prevRepeat);
+            if (prevIdx < 0 || prevIdx >= repeatMarks.Count - 1)
+                return null;
+            else
+                return repeatMarks[prevIdx + 1];
+        }
+
+        /// <summary>
+        /// Obtain the bar number of the first repeat
+        /// marker in the score
+        /// </summary>
+        /// <returns>The bar number of the first
+        /// repeat marker, or null if there are no
+        /// repeats in the score</returns>
+        
+        private int? FirstRepeat()
+        {
+            repeatMarks = new List<int>(NextRepeatMark);
+            if (repeatMarks.Count > 0)
+                return repeatMarks[0];
+            else
+                return null;
+        }
+
         public IList<IMeasure> MeasuresWithRepeats
         {
             get
             {
                 var repeatedMeasures = new List<IMeasure>();
                 var repeatStarts = new Stack<int>();
-                int i = 0;
-                bool repeating = false;
-                while(i < Measures.Count)
+                int nextMeasure = 0;
+                int? nextRepeat = FirstRepeat();
+                while(nextRepeat.HasValue)
                 {
-                    IMeasure m = Measures[i];
-                    if (m.StartsRepeat && !repeating)
-                        repeatStarts.Push(i);
-                    repeating = false;
-                    repeatedMeasures.Add(m);
-                    if (m.EndsRepeat && repeatStarts.Count > 0)
-                    {
-                        repeating = true;
-                        i = repeatStarts.Pop();
-                    }
+                    if (nextRepeat >= 0)
+                        repeatStarts.Push(nextRepeat.Value);
                     else
-                        i++;
+                    {
+                        // We have encountered and end of repeat marker.
+                        // First copy all the bars up to the bar preceding
+                        // the bar with the repeat marker.
+
+                        while (nextMeasure < ~nextRepeat)
+                            repeatedMeasures.Add(Measures[nextMeasure++]);
+
+                        // Pop the bar we have to jump back to
+
+                        int startOfRepeat = repeatStarts.Pop();
+                        if (startOfRepeat >= 0) // Repeat not done yet
+                        {
+                            // Mark the fact that the repeat has been done
+
+                            repeatStarts.Push(-1);
+
+                            // Manufacture and add the bar(s) that contain the repeat
+
+                            var repeatBars = CreateRepeatBars
+                                (Measures[startOfRepeat], Measures[~nextRepeat.Value]);
+                            repeatedMeasures.AddRange(repeatBars);
+                            nextMeasure = startOfRepeat + 1;
+                            nextRepeat = startOfRepeat;
+                        }
+                    }
+                    nextRepeat = NextRepeat(nextRepeat.Value);
                 }
+
+                // Copy any trailing bars after the last repeat
+
+                while (nextMeasure < Measures.Count)
+                    repeatedMeasures.Add(Measures[nextMeasure++]);
+
+                // Strip out the repeat markers
+
+                foreach(IMeasure m in repeatedMeasures)
+                {
+                    IList<INote> barNotes = new List<INote>(m.Notes);
+                    foreach (var note in barNotes)
+                        if (note.Pitch == Note.StartRepeat || note.Pitch == Note.EndRepeat)
+                            m.Notes.Remove(note);
+                }
+
                 return repeatedMeasures;
             }
         }
@@ -119,241 +335,6 @@ namespace HBScore
                     if(note.Pitch + interval < Note.StartRepeat 
                         && note.Pitch + interval > 0)
                         note.Pitch += interval;
-        }
-    }
-
-    /// <summary>
-    /// One bar in the score
-    /// </summary>
-
-    [Serializable]
-    public class Measure : IMeasure
-    {
-        public int BeatsPerBar { get; private set; }
-
-        public int QuarterBeatsPerBar => 
-            CompoundTime ? BeatsPerBar * 6 : BeatsPerBar * 4;
-
-        public bool CompoundTime { get; private set; }
-
-        public IList<INote> Notes { get; private set; }
-
-        public Measure(int beats, bool compound)
-        {
-            BeatsPerBar = beats;
-            CompoundTime = compound;
-            Notes = new List<INote>();
-        }
-
-        public Measure Clone()
-        {
-            var clone = new Measure(BeatsPerBar, CompoundTime);
-            foreach (var n in Notes)
-                if (n is ColouredNote)
-                    clone.Notes.Add((n as ColouredNote).Clone());
-                else
-                    clone.Notes.Add((n as Note).Clone());
-            return clone;
-        }
-
-        public bool StartsRepeat
-            => Notes.Any(n => n.Pitch == Note.StartRepeat);
-
-        public bool EndsRepeat
-            => Notes.Any(n => n.Pitch == Note.EndRepeat);
-
-        public bool HasDoubleBarLine
-            => Notes.Any(n => n.Pitch == Note.DoubleBar);
-    }
-
-    [Serializable]
-    public class Note : INote
-    {
-        /// <summary>
-        /// Distance into bar. Measured in 1/4 of a beat, hence
-        /// use multiples of 4 for consecutive beats, or multiples
-        /// of 2 for quavers. When using compound time, each 'beat'
-        /// is 6 units, as it corresponds to a beat and a half of
-        /// non-compound time.
-        /// For repeat markers, the offset is for the first
-        /// repeated beat for a start repeat. For an end repeat,
-        /// the offset is to the first beat after the repeated
-        /// block.
-        /// </summary>
-
-        public int Offset { get; private set; }
-
-        /// <summary>
-        /// The notes themselves. These are formatted as follows:
-        /// 1 = 01C, 2 = 02B, 3 = 03A#, 4 = 03A, 5 = 04G#, 6 = 04G,
-        /// 7 = 05F#, 8 = 05F, 9 = 06E, 10 = 07D#, 11 = 07D, 12 = 1C#.
-        /// Each octave below this adds multiples of 12 to the note value.
-        /// Hence 37 = 15C, and 42 = 18G. Values of 128 and above are
-        /// special markers. 128 = start repeat, 129 = end repeat,
-        /// 130 = first time bar/sequence, 131 = second time bar/sequence,
-        /// 132 = double bar line section end marker.
-        /// </summary>
-
-        public int Pitch { get; set; }
-        public const int StartRepeat = 128;
-        public const int EndRepeat = 129;
-        public const int FirstTimeSequence = 130;
-        public const int SecondTimeSequence = 131;
-        public const int DoubleBar = 132;
-
-        /// <summary>
-        /// The length of the note in 1/4 beats
-        /// </summary>
-
-        public int Duration { get; set; }
-
-        public Note(int offset, int pitch, int duration)
-        {
-            Offset = offset;
-            Pitch = pitch;
-            Duration = duration;
-        }
-
-        /// <summary>
-        /// Create a deep copy of the note
-        /// </summary>
-        /// <returns>A duplicate of the note</returns>
-        
-        public virtual INote Clone() => new Note(Offset, Pitch, Duration);
-
-        [NonSerialized]
-        private static readonly string[] sharpStrings =
-        {
-            "C",
-            "B",
-            "A#",
-            "A",
-            "G#",
-            "G",
-            "F#",
-            "F",
-            "E",
-            "D#",
-            "D",
-            "C#"
-        };
-
-        [NonSerialized]
-        private static readonly string[] flatStrings =
-        {
-            "C",
-            "B",
-            "B\u266D",
-            "A",
-            "A\u266D",
-            "G",
-            "G\u266D",
-            "F",
-            "E",
-            "E\u266D",
-            "D",
-            "D\u266D"
-        };
-
-        [NonSerialized]
-        private static readonly string[] specialStrings =
-        {
-            "|:",
-            ":|",
-            "||",
-            "|1st|",
-            "|2nd|"
-        };
-
-        public static string NoteName(int pitch, bool useFlats)
-        {
-            if (pitch >= Note.StartRepeat)
-                return specialStrings[pitch - Note.StartRepeat];
-
-            int noteIndex = (pitch - 1) % 12;
-            return useFlats ?
-                flatStrings[noteIndex] : sharpStrings[noteIndex];
-        }
-
-        public string ToString(bool useFlats) => NoteName(Pitch, useFlats);
-
-        public override string ToString() => ToString(false);
-
-        [NonSerialized]
-        private static readonly int[] sharpOffsets =
-        {
-            0, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7
-        };
-
-        [NonSerialized]
-        private static readonly int[] flatOffsets =
-        {
-            0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6
-        };
-
-        public int VerticalOffset(bool useFlats) => BellNumber(Pitch, useFlats);
-
-        public static int BellNumber(int pitch, bool useFlats)
-        {
-            int noteIndex = (pitch - 1) % 12;
-            return 7 * ((pitch - 1) / 12) +
-                (useFlats ? flatOffsets[noteIndex] : sharpOffsets[noteIndex]);
-        }
-
-        public static string NoteString(int pitch)
-        {
-            string noteString;
-            int bellNum = BellNumber(pitch, false);
-            if (bellNum < 7)
-                noteString = "0" + (1 + bellNum) + NoteName(pitch, false);
-            else
-                noteString = (bellNum - 6) + NoteName(pitch, false);
-            if (noteString.EndsWith("#"))
-            {
-                bellNum = BellNumber(pitch, true);
-                if (bellNum < 7)
-                    noteString += "/0" + (1 + bellNum) + NoteName(pitch, true);
-                else
-                    noteString += "/" + (bellNum - 6) + NoteName(pitch, true);
-            }
-            return noteString;
-        }
-
-        public virtual Color ForeColour { get; set; } = Color.Black;
-
-        public virtual Color BackColour { get; set; } = Color.White;
-    }
-
-    [Serializable]
-    public class ColouredNote : Note
-    {
-        public ColouredNote(int offset, int pitch, int duration)
-            : base(offset, pitch, duration)
-        {
-            ForeColour = Color.Black;
-            BackColour = Color.White;
-        }
-
-        public override INote Clone()
-        {
-            var clone = new ColouredNote(Offset, Pitch, Duration)
-            {
-                ForeColour = ForeColour,
-                BackColour = BackColour
-            };
-            return clone;
-        }
-
-        public override Color ForeColour
-        {
-            get;
-            set;
-        }
-
-        public override Color BackColour
-        {
-            get;
-            set;
         }
     }
 }

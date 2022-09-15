@@ -67,7 +67,7 @@ namespace DisplayScore
 
         private void LoadImages()
         {
-            using (var sw = new ScoreWriter(score))
+            using (var sw = new ScoreWriter(score, true))
             {
                 Size musicRect = new Size(sw.ScoreWidthPixels + 58, sw.ScoreHeightPixels + 80);
                 double pageAspect = musicRect.Width

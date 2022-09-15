@@ -48,8 +48,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColouredNote.cs" />
+    <Compile Include="IMeasure.cs" />
+    <Compile Include="INote.cs" />
     <Compile Include="IScore.cs" />
     <Compile Include="IScoreFactory.cs" />
+    <Compile Include="Measure.cs" />
+    <Compile Include="Note.cs" />
     <Compile Include="PDFScoreWriter.cs" />
     <Compile Include="Playback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
