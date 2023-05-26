@@ -27,7 +27,7 @@ namespace HBScoreTests
             score.Measures.Add(sf.CreateMeasure(3, false));
             score.Measures.Add(sf.CreateMeasure(3, false));
             score.Measures.Add(sf.CreateMeasure(4, false));
-            ScoreWriter sw = new ScoreWriter(score, 6);
+            ScoreWriter sw = new ScoreWriter(score, false, 0);
             Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\varBarScore.bmp");
             Assert.IsNotNull(img);
@@ -46,7 +46,7 @@ namespace HBScoreTests
             score.Measures[0].Notes.Add(sf.CreateNote(14, 39, 4));
             score.Measures[0].Notes.Add(sf.CreateNote(14, 40, 4));
             score.Measures[1].Notes.Add(sf.CreateNote(0, 42, 4));
-            ScoreWriter sw = new ScoreWriter(score, 6);
+            ScoreWriter sw = new ScoreWriter(score, false, 0);
             Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\sharpScore.bmp");
             Assert.IsNotNull(img);
@@ -65,7 +65,7 @@ namespace HBScoreTests
             score.Measures[0].Notes.Add(sf.CreateNote(14, 39, 4));
             score.Measures[0].Notes.Add(sf.CreateNote(14, 40, 4));
             score.Measures[1].Notes.Add(sf.CreateNote(0, 42, 4));
-            ScoreWriter sw = new ScoreWriter(score, 6);
+            ScoreWriter sw = new ScoreWriter(score, false, 0);
             Image img = sw.RenderPage(0);
             img.Save("c:\\tmp\\flatScore.bmp");
             Assert.IsNotNull(img);

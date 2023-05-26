@@ -32,7 +32,7 @@ namespace HBScore
             Notes = new List<INote>();
         }
 
-        public Measure Clone()
+        public IMeasure Clone()
         {
             var clone = new Measure(BeatsPerBar, CompoundTime);
             foreach (var n in Notes)

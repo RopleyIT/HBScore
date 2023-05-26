@@ -55,5 +55,12 @@ namespace HBScore
         /// </summary>
 
         bool HasDoubleBarLine { get; }
+
+        /// <summary>
+        /// Create a clone of the entire bar
+        /// </summary>
+        /// <returns>The cloned bar</returns>
+        
+        IMeasure Clone();
     }
 }

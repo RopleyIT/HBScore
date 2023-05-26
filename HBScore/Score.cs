@@ -252,7 +252,7 @@ namespace HBScore
                         // the bar with the repeat marker.
 
                         while (nextMeasure < ~nextRepeat)
-                            repeatedMeasures.Add(Measures[nextMeasure++]);
+                            repeatedMeasures.Add(Measures[nextMeasure++].Clone());
 
                         // Pop the bar we have to jump back to
 
@@ -278,7 +278,7 @@ namespace HBScore
                 // Copy any trailing bars after the last repeat
 
                 while (nextMeasure < Measures.Count)
-                    repeatedMeasures.Add(Measures[nextMeasure++]);
+                    repeatedMeasures.Add(Measures[nextMeasure++].Clone());
 
                 // Strip out the repeat markers
 
