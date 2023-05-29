@@ -10,6 +10,9 @@ This program allows you to fill the screen of your tablet or PC a page at a time
 lots of sheets of paper along your handbell table. Tapping the right half of the screen with a finger (tablets) or clicking a mouse in the right half
 of the screen advances the display one page of music. Tapping in (most of) the left half of the screen goes back a page. Tapping in the top left corner brings up a context menu
 with menu items big enough to poke with your finger if using a tablet. These allow you to rewind to the first page of music, or the quit the program.
+Note that repeat marks in the HBScore music editing program are expanded out in the DisplayScore application. Hence while playing a
+piece it is not
+necessary to frantically wind back to the start of a repeat.
 
 ### Licensing
 This product is published under the [standard MIT License](https://opensource.org/licenses/MIT). The specific wording for this license is as follows:
