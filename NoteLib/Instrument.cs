@@ -53,11 +53,49 @@ namespace NoteLib
             {
                 double t = i / (double)sampleRate;
                 double frequency = fundamental * h.Multiplier;
-                double amplitude = h.DecayedAmplitude(t);
+                double amplitude = h.Envelope(t);
                 sample += amplitude * Math.Sin(2 * Math.PI * frequency * t);
             }
             return (float)sample;
         }
+
+        private float ReleaseSample(int i, float fundamental, int length)
+        {
+            if(i < length)
+                throw new ArgumentException("i < length");
+            double sample = 0;
+            double duration = length/ (double)sampleRate;
+            double t = i / (double)sampleRate;
+            if (t > duration + ReleaseDuration)
+                return 0;
+            foreach (Harmonic h in Harmonics)
+            {
+                double frequency = fundamental * h.Multiplier;
+                double amplitude = h.ReleaseEnvelope(t, duration);
+                sample += amplitude * Math.Sin(2 * Math.PI * frequency * t);
+            }
+            return (float)sample;
+        }
+
+        private IEnumerable<float> ReleaseSamplesForPitch(float pitch, int length) 
+            => Enumerable
+                .Range(length, ReleaseSampleCount)
+                .Select(i => ReleaseSample(i, pitch, length));
+
+        /// <summary>
+        /// The voiced tail of the note after release
+        /// </summary>
+
+        public float ReleaseDuration =>
+            Harmonics.Select(h => h.ReleaseDuration).Max();
+
+        /// <summary>
+        /// The number of samples taken for the
+        /// release envelope to decay to zero
+        /// </summary>
+        
+        public int ReleaseSampleCount =>
+            (int)(ReleaseDuration * sampleRate);
 
         /// <summary>
         /// Given the pitch, return the table of signal
@@ -66,10 +104,12 @@ namespace NoteLib
         /// <param name="pitch">The pitch for which we want samples</param>
         /// <returns>The table of sound samples for this instrument and pitch</returns>
 
-        public IEnumerable<float> SamplesForPitch(float pitch)
+        public IEnumerable<float> SamplesForPitch(float pitch, int sampleCount)
         {
             InitSamplesForPitch(pitch);
-            return noteSamples[pitch];
+            return noteSamples[pitch]
+                .Take(sampleCount)
+                .Concat(ReleaseSamplesForPitch(pitch, sampleCount));
         }
 
         /// <summary>

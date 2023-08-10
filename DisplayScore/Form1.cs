@@ -75,6 +75,9 @@ namespace DisplayScore
                 double pbxAspect = pbxScore.ClientSize.Width
                     / (double)pbxScore.ClientSize.Height;
                 Rectangle content = Rectangle.Empty;
+                Rectangle lpNumber = Rectangle.Empty;
+                Rectangle rpNumber = Rectangle.Empty;
+                int stepSize = 0;
                 if (pageAspect < pbxAspect)
                 {
                     double scale = pbxScore.ClientSize.Height
@@ -83,6 +86,11 @@ namespace DisplayScore
                     content.Height = pbxScore.ClientSize.Height;
                     content.X = (pbxScore.ClientSize.Width - content.Width) / 2;
                     content.Y = 0;
+                    lpNumber.Width = content.X;
+                    lpNumber.Height = 96;
+                    rpNumber = lpNumber;
+                    rpNumber.X = content.Right;
+                    stepSize = pbxScore.ClientSize.Height/sw.PageImages.Count();
                 }
                 else
                 {
@@ -92,9 +100,15 @@ namespace DisplayScore
                     content.Height = (int)(scale * musicRect.Height);
                     content.X = 0;
                     content.Y = (pbxScore.ClientSize.Height - content.Height) / 2;
+                    lpNumber.Width = (int)(content.Y * 1.5);
+                    lpNumber.Height = content.Y;
+                    rpNumber = lpNumber;
+                    rpNumber.Y = content.Bottom;
+                    stepSize = (pbxScore.ClientSize.Width - lpNumber.Width)
+                        / (sw.PageImages.Count() - 1);
                 }
                 var src = new Rectangle(Point.Empty, musicRect);
-                bool musicPage = false;
+                int pageNum = 0;
                 foreach (var page in sw.PageImages)
                 {
                     Bitmap bmp = new Bitmap
@@ -105,19 +119,46 @@ namespace DisplayScore
                         g.SmoothingMode = SmoothingMode.HighQuality;
                         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                         g.CompositingQuality = CompositingQuality.HighQuality;
-                        if(musicPage)
-                            g.DrawImage(page, content, src, GraphicsUnit.Pixel);
-                        else
+                        if (pageNum > 0)
                         {
-                            g.DrawImage(page, content);
-                            musicPage = true;
+                            PaintPageNumbers(g, lpNumber, rpNumber, stepSize, pageNum);
+                            g.DrawImage(page, content, src, GraphicsUnit.Pixel);
                         }
+                        else
+                            g.DrawImage(page, content);
                     }
                     pageImages.Items.Add(bmp);
+                    pageNum++;
                 }
             }
             if (pageImages.Items.Count > 0)
                 pbxScore.Image = pageImages.Items[0];
+        }
+
+        private RectangleF RectFloat(Rectangle r)
+        {
+            return new RectangleF(r.X, r.Y, r.Width, r.Height);
+        }
+
+        private void PaintPageNumbers(Graphics g, Rectangle lpNumber, Rectangle rpNumber, int stepSize, int pageNum)
+        {
+            int offset = stepSize * (pageNum - 1);
+            if (lpNumber.Y == rpNumber.Y)
+            {
+                lpNumber.Y = offset;
+                rpNumber.Y = offset;
+            }
+            else
+            {
+                lpNumber.X = offset;
+                rpNumber.X = offset;
+            }
+
+            using (Font f = new Font("Arial", lpNumber.Height, GraphicsUnit.Pixel))
+            {
+                g.DrawString(pageNum.ToString(), f, Brushes.White, RectFloat(lpNumber));
+                g.DrawString(pageNum.ToString(), f, Brushes.White, RectFloat(rpNumber));
+            }
         }
 
         private void PbxScore_MouseUp(object sender, MouseEventArgs e)

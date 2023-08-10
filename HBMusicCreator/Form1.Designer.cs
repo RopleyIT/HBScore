@@ -47,6 +47,7 @@
             this.textBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.endRepeatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.doubleBarlineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transposeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopPlayingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -129,7 +130,6 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.cbMetronome = new System.Windows.Forms.ComboBox();
-            this.doubleBarlineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMainForm.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbxScore)).BeginInit();
@@ -295,6 +295,13 @@
             this.endRepeatToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.endRepeatToolStripMenuItem.Text = "End repeat";
             this.endRepeatToolStripMenuItem.Click += new System.EventHandler(this.endRepeatToolStripMenuItem_Click);
+            // 
+            // doubleBarlineToolStripMenuItem
+            // 
+            this.doubleBarlineToolStripMenuItem.Name = "doubleBarlineToolStripMenuItem";
+            this.doubleBarlineToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.doubleBarlineToolStripMenuItem.Text = "Double barline";
+            this.doubleBarlineToolStripMenuItem.Click += new System.EventHandler(this.doubleBarlineToolStripMenuItem_Click);
             // 
             // transposeToolStripMenuItem
             // 
@@ -1407,7 +1414,11 @@
             "5",
             "6",
             "7",
-            "8"});
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"});
             this.cbxBeats.Location = new System.Drawing.Point(956, 528);
             this.cbxBeats.Name = "cbxBeats";
             this.cbxBeats.Size = new System.Drawing.Size(67, 21);
@@ -1467,13 +1478,6 @@
             this.cbMetronome.Name = "cbMetronome";
             this.cbMetronome.Size = new System.Drawing.Size(66, 21);
             this.cbMetronome.TabIndex = 15;
-            // 
-            // doubleBarlineToolStripMenuItem
-            // 
-            this.doubleBarlineToolStripMenuItem.Name = "doubleBarlineToolStripMenuItem";
-            this.doubleBarlineToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.doubleBarlineToolStripMenuItem.Text = "Double barline";
-            this.doubleBarlineToolStripMenuItem.Click += new System.EventHandler(this.doubleBarlineToolStripMenuItem_Click);
             // 
             // FrmMain
             // 

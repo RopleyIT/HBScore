@@ -1,3 +1,4 @@
+* Debug noise on playback note ends
 * Colours have different timbre tones in playback associated with selected colour.
 * Timbre of parts can be fiddled with to set harmonics and durations.
 * Long note lines spill to next system/page if split across line ends.

@@ -7,7 +7,7 @@ namespace NoteLib
 {
     public class NoteSampleProvider : ISampleProvider
     {
-        public const float MasterVolume = 0.7071f;
+        public const float MasterVolume = 0.5f;
 
         /// <summary>
         /// The metronome marking for the piece. This
@@ -22,6 +22,8 @@ namespace NoteLib
 
         private readonly IEnumerable<Note> Notes;
         private readonly List<float> samples = new List<float>();
+        private float[] outputSamples;
+        private int idx;
 
         public NoteSampleProvider(int metre, IEnumerable<Note> notes)
         {
@@ -31,6 +33,8 @@ namespace NoteLib
             foreach (Note n in Notes)
                 MergeSamples(n);
             NormaliseAmplitude();
+            outputSamples = samples.ToArray();
+            idx = 0;
         }
 
         private void NormaliseAmplitude()
@@ -46,7 +50,7 @@ namespace NoteLib
             int end = n.EndSampleIndex(44100f, Metre);
             if (start > samples.Count)
                 samples.AddRange(Enumerable.Repeat(0.0f, start - samples.Count));
-            foreach (float f in n.UnshiftedSamples.Take(end - start))
+            foreach (float f in n.UnshiftedSamples(end - start))
                 if (samples.Count > start)
                     samples[start++] += f;
                 else
@@ -58,16 +62,12 @@ namespace NoteLib
 
         public WaveFormat WaveFormat { get; private set; }
 
-        private IEnumerator<float> sampleIterator = null;
-
         public int Read(float[] buffer, int offset, int count)
         {
-            if (sampleIterator == null)
-                sampleIterator = samples.GetEnumerator();
             int numSamplesRead = 0;
-            while (numSamplesRead < count && sampleIterator.MoveNext())
+            while (numSamplesRead < count && idx < outputSamples.Length)
             {
-                buffer[offset++] = sampleIterator.Current;
+                buffer[offset++] = outputSamples[idx++];
                 numSamplesRead++;
             }
             return numSamplesRead;

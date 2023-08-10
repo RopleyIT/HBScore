@@ -82,19 +82,21 @@ namespace NoteLib
             int duration = EndSampleIndex(sampleRate, metre) - start;
             return Enumerable
                 .Repeat(0f, start)
-                .Concat(UnshiftedSamples
-                .Select(s => Amplitude * s)
-                .Take(duration));
+                .Concat(UnshiftedSamples(duration)
+                .Select(s => Amplitude * s));
         }
 
         /// <summary>
         /// The samples for the note itself, starting as soon
         /// as the note sound begins, rather than delayed to
-        /// the point at which it appears in the score
+        /// the point at which it appears in the score. Note that
+        /// the enumerable might return more than sampleCount
+        /// smaples, as there is a release envelope on the end
+        /// of the waveform.
         /// </summary>
 
-        public IEnumerable<float> UnshiftedSamples
-            => Instrument.SamplesForPitch(Pitch);
+        public IEnumerable<float> UnshiftedSamples(int sampleCount)
+            => Instrument.SamplesForPitch(Pitch, sampleCount);
 
         /// <summary>
         /// The sample number at which the note's sound begins
